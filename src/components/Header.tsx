@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     width: '100%',
     paddingRight: '24px',
+    boxSizing: 'content-box',
   },
   title: {
     display: 'none',
