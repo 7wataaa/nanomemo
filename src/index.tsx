@@ -64,7 +64,8 @@ function Body() {
       id: '0',
       title: 'Title',
       tags: ['#tag1', '#tag2'],
-      content: 'content1content1content1content1content1conte nt1content1content1content1content1conten t1content1content1content1content1'
+      content: 'content1content1content1content1co' +
+        'ntent1conte nt1content1content1content1content1conten t1content1content1content1content1'
     } as MemoCardProps, {
       id: '1',
       title: 'Title',
