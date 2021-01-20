@@ -3,8 +3,8 @@ import { makeStyles, Card, Typography, CardContent } from '@material-ui/core'
 
 const useMemoCardStyle = makeStyles(() => ({
   card: {
-    /* width: 250,
-    height: 251, */
+    width: '100%',
+    height: '100%',
   },
   tagnames: {
     fontSize: 14,
@@ -13,7 +13,11 @@ const useMemoCardStyle = makeStyles(() => ({
     marginBottom: 12,
   },
   memocontent: {
+    width: '100%',
+    height: '100%',
     overflowWrap: 'break-word',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
   }
 }))
 
