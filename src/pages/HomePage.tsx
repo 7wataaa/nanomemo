@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import MemoCard from '../components/MemoCard'
 import { Add } from '@material-ui/icons'
 import { Fab, makeStyles, ThemeProvider, CssBaseline, Typography, Grid } from '@material-ui/core'
+import { Link, Redirect } from 'react-router-dom'
+import firebase from 'firebase/app'
 
 
 const useHomePageStyles = makeStyles((theme) => ({
@@ -24,11 +26,26 @@ const useHomePageStyles = makeStyles((theme) => ({
 }))
 
 function HomePage() {
+  const [user, setUser] = useState<null | firebase.User>(null)
+
   const classes = useHomePageStyles()
 
-  return <>
+  const login = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider()
+    await firebase.auth().signInWithRedirect(provider)
+  }
 
-    <Header />
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      setUser(user)
+    } else {
+
+    }
+  })
+
+  return <>
+    {firebase.auth().currentUser != null ? <Header user={firebase.auth().currentUser} />
+      : <Header user={null} />}
 
     <div className={classes.offset} />
 
@@ -65,24 +82,24 @@ function Body() {
       `,
     } as MemoCardProps, {
       id: '1',
-      title: 'Title',
+      title: 'displayName',
       tags: ['#tag1', '#tag2'],
-      content: 'content2'
+      content: `${firebase.auth().currentUser?.displayName}`
     } as MemoCardProps, {
       id: '2',
-      title: 'Title',
+      title: 'email',
       tags: ['#tag1', '#tag2'],
-      content: 'content3'
+      content: `${firebase.auth().currentUser?.email}`
     } as MemoCardProps, {
       id: '3',
-      title: 'Title',
+      title: 'uid',
       tags: ['#tag1', '#tag2'],
-      content: 'content4'
+      content: `${firebase.auth().currentUser?.uid}`
     } as MemoCardProps, {
       id: '4',
-      title: 'Title',
+      title: 'photoURL',
       tags: ['#tag1', '#tag2'],
-      content: 'content5'
+      content: `${firebase.auth().currentUser?.photoURL}`
     } as MemoCardProps, {
       id: '5',
       title: 'Title',

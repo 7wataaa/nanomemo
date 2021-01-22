@@ -1,6 +1,8 @@
 import { fade, AppBar, makeStyles, Toolbar, InputBase, Avatar, Typography } from '@material-ui/core'
 import { Person, Search } from '@material-ui/icons'
 import React from 'react'
+import firebase from 'firebase/app'
+import 'firebase/auth'
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -67,13 +69,18 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Header = () => {
-
+const Header = (prop: { user: firebase.User | null }) => {
   const classes = useStyles()
 
-  const time = Date()
-
-  console.log(time)
+  const userAvatar = (user: firebase.User | null) => {
+    if (user?.photoURL != null) {
+      return <Avatar className={classes.avatar} src={user.photoURL} />
+    } else {
+      return <Avatar className={classes.avatar}>
+        <Person />
+      </Avatar>
+    }
+  }
 
   return <div className={classes.grow}>
     <AppBar className={classes.appbar}>
@@ -89,9 +96,7 @@ const Header = () => {
             }}
           />
         </div>
-        <Avatar className={classes.avatar}>
-          <Person />
-        </Avatar>
+        {userAvatar(prop.user)}
       </Toolbar>
     </AppBar>
   </div>
