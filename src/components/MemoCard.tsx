@@ -1,5 +1,5 @@
-import React from 'react'
-import { makeStyles, Card, Typography, CardContent } from '@material-ui/core'
+import React from 'react';
+import { makeStyles, Card, Typography, CardContent } from '@material-ui/core';
 
 const useMemoCardStyle = makeStyles(() => ({
   card: {
@@ -18,13 +18,13 @@ const useMemoCardStyle = makeStyles(() => ({
     overflowWrap: 'break-word',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
-  }
-}))
+  },
+}));
 
 interface MemoCardProps {
-  title: string,
-  tags: string[],
-  content: string,
+  title: string;
+  tags: string[];
+  content: string;
 }
 
 /**
@@ -36,25 +36,34 @@ interface MemoCardProps {
   content: string,
 }
  */
-const MemoCard = (props: MemoCardProps) => {
+const MemoCard = (props: MemoCardProps): JSX.Element => {
+  const classes = useMemoCardStyle();
 
-  const classes = useMemoCardStyle()
+  return (
+    <>
+      <Card className={classes.card} variant="outlined">
+        <CardContent>
+          <Typography
+            className={classes.tagnames}
+            color="textSecondary"
+            gutterBottom
+          >
+            {props.tags.join(' ')}
+          </Typography>
+          <Typography className={classes.title} variant="h5" component="h2">
+            {props.title}
+          </Typography>
+          <Typography
+            className={classes.memocontent}
+            variant="body2"
+            component="p"
+          >
+            {props.content}
+          </Typography>
+        </CardContent>
+      </Card>
+    </>
+  );
+};
 
-  return <>
-    <Card className={classes.card} variant="outlined">
-      <CardContent>
-        <Typography className={classes.tagnames} color="textSecondary" gutterBottom>
-          {props.tags.join(' ')}
-        </Typography>
-        <Typography className={classes.title} variant="h5" component="h2">
-          {props.title}
-        </Typography>
-        <Typography className={classes.memocontent} variant="body2" component="p">
-          {props.content}
-        </Typography>
-      </CardContent>
-    </Card>
-  </>
-}
-
-export default MemoCard
+export default MemoCard;

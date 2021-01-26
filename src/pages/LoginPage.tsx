@@ -1,10 +1,10 @@
-import { Button, makeStyles } from '@material-ui/core'
-import React, { useState, useEffect } from 'react'
-import firebase from 'firebase/app'
-import 'firebase/auth'
-import { Link, Redirect } from 'react-router-dom'
+import { Button, makeStyles } from '@material-ui/core';
+import React, { useState } from 'react';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import { Link, Redirect } from 'react-router-dom';
 
-const useLoginPageStyles = makeStyles((theme) => ({
+const useLoginPageStyles = makeStyles(() => ({
   loginpage: {
     height: '100%',
     display: 'flex',
@@ -13,35 +13,48 @@ const useLoginPageStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     gap: '1ch',
   },
-  btn: {
-  }
-}))
+  btn: {},
+}));
 
-function LoginPage() {
-  const [user, setUser] = useState<firebase.User | null>(null)
+export default function LoginPage(): JSX.Element {
+  const [, setUser] = useState<firebase.User | null>(null);
 
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      setUser(user);
 
-  firebase.auth().onAuthStateChanged(user => {
+      return <Redirect to="/" />;
+    }
     setUser(user);
-    console.log(user?.uid ?? 'uid == null')
   });
 
+  const classes = useLoginPageStyles();
 
   const login = async () => {
-    const provider = new firebase.auth.GoogleAuthProvider()
-    await firebase.auth().signInWithRedirect(provider)
-  }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await firebase.auth().signInWithRedirect(provider);
+  };
 
-  const classes = useLoginPageStyles()
+  const logout = () => {
+    firebase.auth().signOut();
+  };
 
-  if (firebase.auth().currentUser == null) {
-    return <div className={classes.loginpage}>
-      <p>ログインしてないよ</p>
-      <Button className={classes.btn} variant="contained" onClick={login}>Google Signin</Button>
+  return (
+    <div className={classes.loginpage}>
+      {firebase.auth().currentUser == null ? (
+        <Button className={classes.btn} variant="contained" onClick={login}>
+          Google Signin
+        </Button>
+      ) : (
+        <>
+          <Button variant="contained" onClick={logout}>
+            signOut
+          </Button>
+          <Link to="/">
+            <Button variant="contained">HomePage</Button>
+          </Link>
+        </>
+      )}
     </div>
-  }
-
-  return <Redirect to="/"></Redirect>
+  );
 }
-
-export default LoginPage

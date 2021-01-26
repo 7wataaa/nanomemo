@@ -1,4 +1,4 @@
-import { createMuiTheme } from '@material-ui/core/styles'
+import { createMuiTheme } from '@material-ui/core/styles';
 
 export const myTheme = createMuiTheme({
   palette: {
@@ -13,14 +13,13 @@ export const myTheme = createMuiTheme({
       '700': '#1d2c35',
       '800': '#17242d',
       '900': '#0e171f',
-      'A100': '#60b6ff',
-      'A200': '#2d9eff',
-      'A400': '#0086f9',
-      'A700': '#0078e0',
+      A100: '#60b6ff',
+      A200: '#2d9eff',
+      A400: '#0086f9',
+      A700: '#0078e0',
     },
     background: {
       default: '#E9ECEF',
-    }
-
-  }
-})
+    },
+  },
+});

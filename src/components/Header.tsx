@@ -1,12 +1,21 @@
-import { fade, AppBar, makeStyles, Toolbar, InputBase, Avatar, Typography } from '@material-ui/core'
-import { Person, Search } from '@material-ui/icons'
-import React from 'react'
-import firebase from 'firebase/app'
-import 'firebase/auth'
+import {
+  fade,
+  AppBar,
+  makeStyles,
+  Toolbar,
+  InputBase,
+  Avatar,
+  Typography,
+} from '@material-ui/core';
+import { Person, Search } from '@material-ui/icons';
+import React from 'react';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   appbar: {
     alignItems: 'start',
@@ -20,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'none',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
-
     },
   },
   search: {
@@ -66,40 +74,46 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       marginRight: '50px',
     },
-  }
-}))
+  },
+}));
 
-const Header = (prop: { user: firebase.User | null }) => {
-  const classes = useStyles()
+const Header = (prop: { user: firebase.User | null }): JSX.Element => {
+  const classes = useStyles();
 
   const userAvatar = (user: firebase.User | null) => {
     if (user?.photoURL != null) {
-      return <Avatar className={classes.avatar} src={user.photoURL} />
+      return <Avatar className={classes.avatar} src={user.photoURL} />;
     } else {
-      return <Avatar className={classes.avatar}>
-        <Person />
-      </Avatar>
+      return (
+        <Avatar className={classes.avatar}>
+          <Person />
+        </Avatar>
+      );
     }
-  }
+  };
 
-  return <div className={classes.grow}>
-    <AppBar className={classes.appbar}>
-      <Toolbar className={classes.toolbar}>
-        <Typography variant='h6' className={classes.title}>memoapp</Typography>
-        <div className={classes.search}>
-          <Search className={classes.searchIcon} />
-          <InputBase
-            placeholder="Search..."
-            classes={{
-              root: classes.inputRoot,
-              input: classes.inputInput,
-            }}
-          />
-        </div>
-        {userAvatar(prop.user)}
-      </Toolbar>
-    </AppBar>
-  </div>
-}
+  return (
+    <div className={classes.grow}>
+      <AppBar className={classes.appbar}>
+        <Toolbar className={classes.toolbar}>
+          <Typography variant="h6" className={classes.title}>
+            memoapp
+          </Typography>
+          <div className={classes.search}>
+            <Search className={classes.searchIcon} />
+            <InputBase
+              placeholder="Search..."
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput,
+              }}
+            />
+          </div>
+          <Link to="/login">{userAvatar(prop.user)}</Link>
+        </Toolbar>
+      </AppBar>
+    </div>
+  );
+};
 
-export default Header
+export default Header;
