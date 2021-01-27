@@ -17,15 +17,12 @@ const useLoginPageStyles = makeStyles(() => ({
 }));
 
 export default function LoginPage(): JSX.Element {
-  const [, setUser] = useState<firebase.User | null>(null);
+  const [user, setUser] = useState<firebase.User | null>(null);
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       setUser(user);
-
-      return <Redirect to="/" />;
     }
-    setUser(user);
   });
 
   const classes = useLoginPageStyles();
@@ -38,6 +35,11 @@ export default function LoginPage(): JSX.Element {
   const logout = () => {
     firebase.auth().signOut();
   };
+
+  if (user) {
+    console.log('user が存在するので/にリダイレクト');
+    return <Redirect to="/" />;
+  }
 
   return (
     <div className={classes.loginpage}>

@@ -6,9 +6,14 @@ import {
   InputBase,
   Avatar,
   Typography,
+  Popper,
+  MenuItem,
+  Paper,
+  ClickAwayListener,
+  MenuList,
 } from '@material-ui/core';
 import { Person, Search } from '@material-ui/icons';
-import React from 'react';
+import React, { RefObject, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import { Link } from 'react-router-dom';
@@ -18,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   appbar: {
+    zIndex: 1,
     alignItems: 'start',
   },
   toolbar: {
@@ -75,14 +81,58 @@ const useStyles = makeStyles((theme) => ({
       marginRight: '50px',
     },
   },
+  paper: {
+    position: 'relative',
+    zIndex: 2,
+  },
 }));
 
-const Header = (prop: { user: firebase.User | null }): JSX.Element => {
+const Header = (prop: { user: firebase.User }): JSX.Element => {
   const classes = useStyles();
+
+  const [open, setOpen] = useState(false);
+  const anchorRef = React.useRef<HTMLDivElement>(null);
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event: React.MouseEvent<EventTarget>) => {
+    if (
+      anchorRef.current &&
+      anchorRef.current.contains(event.target as HTMLElement)
+    ) {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event: React.KeyboardEvent) {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
+
+  const prevOpen = React.useRef(open);
+  React.useEffect(() => {
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current?.focus();
+    }
+
+    prevOpen.current = open;
+  }, [open]);
 
   const userAvatar = (user: firebase.User | null) => {
     if (user?.photoURL != null) {
-      return <Avatar className={classes.avatar} src={user.photoURL} />;
+      return (
+        <Avatar
+          className={classes.avatar}
+          src={user.photoURL}
+          aria-haspopup={true}
+        />
+      );
     } else {
       return (
         <Avatar className={classes.avatar}>
@@ -90,6 +140,10 @@ const Header = (prop: { user: firebase.User | null }): JSX.Element => {
         </Avatar>
       );
     }
+  };
+
+  const reff = (ref: RefObject<HTMLDivElement>) => {
+    return ref ? ref : undefined;
   };
 
   return (
@@ -109,7 +163,33 @@ const Header = (prop: { user: firebase.User | null }): JSX.Element => {
               }}
             />
           </div>
-          <Link to="/login">{userAvatar(prop.user)}</Link>
+          <>
+            <div ref={reff(anchorRef)} onClick={handleToggle}>
+              {userAvatar(prop.user)}
+            </div>
+            <Popper open={open} anchorEl={anchorRef.current} role={undefined}>
+              <Paper className={classes.paper}>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <MenuList
+                    id="menu-list-grow"
+                    autoFocusItem={open}
+                    onKeyDown={handleListKeyDown}
+                  >
+                    <MenuItem
+                      onClick={(event) => {
+                        handleClose(event);
+                        firebase.auth().signOut();
+                        location.href = '/';
+                      }}
+                      key={1}
+                    >
+                      <Typography>Log out</Typography>
+                    </MenuItem>
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Popper>
+          </>
         </Toolbar>
       </AppBar>
     </div>

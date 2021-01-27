@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Header from '../components/Header';
 import MemoCard from '../components/MemoCard';
 import { Add } from '@material-ui/icons';
 import { Fab, makeStyles } from '@material-ui/core';
 import firebase from 'firebase/app';
+import { Redirect } from 'react-router-dom';
 
 const useHomePageStyles = makeStyles((theme) => ({
   offset: {
@@ -24,23 +25,18 @@ const useHomePageStyles = makeStyles((theme) => ({
 }));
 
 function HomePage(): JSX.Element {
-  const [, setUser] = useState<null | firebase.User>(null);
-
   const classes = useHomePageStyles();
 
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      setUser(user);
-    }
-  });
+  const user = firebase.auth().currentUser;
+
+  if (user == null) {
+    console.log('userが空なので/loginにリダイレクト');
+    return <Redirect to="/login" />;
+  }
 
   return (
     <>
-      {firebase.auth().currentUser != null ? (
-        <Header user={firebase.auth().currentUser} />
-      ) : (
-        <Header user={null} />
-      )}
+      <Header user={user} />
 
       <div className={classes.offset} />
 
