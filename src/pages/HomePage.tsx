@@ -73,7 +73,6 @@ interface MemoCardProps {
 
 function Body(prop: { user: firebase.User }) {
   const classes = useHomePageStyles();
-  //TODO ユーザーのメモ一覧を取得する
 
   const [memoData, setMemoData] = useState<Array<MemoCardProps> | null>(null);
 
@@ -82,6 +81,14 @@ function Body(prop: { user: firebase.User }) {
 
     (async () => {
       const result: MemoCardProps[] = [];
+
+      /*const wait = (sec: number) => {
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, sec * 1000);
+        });
+      };
+
+      await wait(7);*/
 
       (
         await firebase
