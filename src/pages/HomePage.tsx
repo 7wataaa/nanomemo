@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import MemoCard from '../components/MemoCard';
 import { Add } from '@material-ui/icons';
-import { Fab, makeStyles } from '@material-ui/core';
+import { Fab, makeStyles, Typography } from '@material-ui/core';
 import firebase from 'firebase/app';
+import 'firebase/firestore';
+import 'firebase/auth';
 import { Redirect } from 'react-router-dom';
+import MemoCardSkeletons from '../components/MemoCardSkeletons';
 
 const useHomePageStyles = makeStyles((theme) => ({
   offset: {
@@ -22,6 +25,18 @@ const useHomePageStyles = makeStyles((theme) => ({
   extendedIcon: {
     marginRight: theme.spacing(1),
   },
+  hintText: {
+    color: '#757575',
+    display: 'inline-block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+  typography: {
+    textSlign: 'center',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    display: 'table',
+  },
 }));
 
 function HomePage(): JSX.Element {
@@ -29,7 +44,7 @@ function HomePage(): JSX.Element {
 
   const user = firebase.auth().currentUser;
 
-  if (user == null) {
+  if (!user) {
     console.log('userが空なので/loginにリダイレクト');
     return <Redirect to="/login" />;
   }
@@ -40,7 +55,7 @@ function HomePage(): JSX.Element {
 
       <div className={classes.offset} />
 
-      <Body />
+      <Body user={user} />
 
       <Fab className={classes.fab} variant="extended">
         <Add className={classes.extendedIcon} /> New Memo
@@ -56,62 +71,56 @@ interface MemoCardProps {
   content: string;
 }
 
-function Body() {
-  const memoinfoMock = [
-    {
-      id: '0',
-      title: 'Title',
-      tags: ['#tag1', '#tag2'],
-      content: `
-      content1,content1,content1,content1,content1,content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      content1,content1,content1,content1,content1,
-      `,
-    } as MemoCardProps,
-    {
-      id: '1',
-      title: 'displayName',
-      tags: ['#tag1', '#tag2'],
-      content: `${firebase.auth().currentUser?.displayName}`,
-    } as MemoCardProps,
-    {
-      id: '2',
-      title: 'email',
-      tags: ['#tag1', '#tag2'],
-      content: `${firebase.auth().currentUser?.email}`,
-    } as MemoCardProps,
-    {
-      id: '3',
-      title: 'uid',
-      tags: ['#tag1', '#tag2'],
-      content: `${firebase.auth().currentUser?.uid}`,
-    } as MemoCardProps,
-    {
-      id: '4',
-      title: 'photoURL',
-      tags: ['#tag1', '#tag2'],
-      content: `${firebase.auth().currentUser?.photoURL}`,
-    } as MemoCardProps,
-    {
-      id: '5',
-      title: 'Title',
-      tags: ['#tag1', '#tag2'],
-      content: 'content6',
-    } as MemoCardProps,
-    {
-      id: '6',
-      title: 'Title',
-      tags: ['#tag1', '#tag2'],
-      content: 'content7',
-    } as MemoCardProps,
-  ];
+function Body(prop: { user: firebase.User }) {
+  const classes = useHomePageStyles();
+  //TODO ユーザーのメモ一覧を取得する
 
-  return <Memos memoinfos={memoinfoMock} />;
+  const [memoData, setMemoData] = useState<Array<MemoCardProps> | null>(null);
+
+  useEffect(() => {
+    let unmounted = false;
+
+    (async () => {
+      const result: MemoCardProps[] = [];
+
+      (
+        await firebase
+          .firestore()
+          .collection('files')
+          .doc(`${prop.user.uid}`)
+          .collection('userFiles')
+          .get()
+      ).forEach((docsnapshot) => {
+        result.push({
+          title: docsnapshot.get('title'),
+          content: docsnapshot.get('content'),
+          tags: docsnapshot.get('tags'),
+          id: docsnapshot.id,
+        });
+      });
+
+      if (!unmounted) {
+        console.log('setMemoDataが呼ばれた');
+        setMemoData(result);
+      }
+    })();
+
+    console.log('koko');
+
+    return () => {
+      unmounted = true;
+    };
+  }, []);
+
+  if (memoData != null && !memoData.length) {
+    return (
+      <Typography className={classes.typography} component="div">
+        <h2 className={classes.hintText}>右下のボタンからメモを作成できます</h2>
+      </Typography>
+    );
+  }
+
+  return <Memos memoData={memoData != null ? memoData : 'skeleton'} />;
 }
 
 const useMemoStyle = makeStyles(() => ({
@@ -126,12 +135,16 @@ const useMemoStyle = makeStyles(() => ({
 }));
 
 /**
- * @param {MemoCardProps} memoinfo このリストに入ってる情報でMemoCardたちを作る
+ * @param {MemoCardProps} memoData このリストに入ってる情報でMemoCardたちを作る
  */
-function Memos(props: { memoinfos: MemoCardProps[] }) {
+function Memos(props: { memoData: MemoCardProps[] | 'skeleton' }) {
   const classes = useMemoStyle();
 
-  const cards = props.memoinfos.map((e) => {
+  if (props.memoData === 'skeleton') {
+    return <MemoCardSkeletons />;
+  }
+
+  const cards = props.memoData.map((e) => {
     return (
       <MemoCard key={e.id} title={e.title} tags={e.tags} content={e.content} />
     );

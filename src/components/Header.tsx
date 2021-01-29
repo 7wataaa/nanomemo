@@ -16,7 +16,6 @@ import { Person, Search } from '@material-ui/icons';
 import React, { RefObject, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
