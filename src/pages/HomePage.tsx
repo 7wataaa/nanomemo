@@ -57,8 +57,8 @@ function HomePage(): JSX.Element {
 
       <Body user={user} />
 
-      <Fab className={classes.fab} variant="extended">
-        <Add className={classes.extendedIcon} /> New Memo
+      <Fab className={classes.fab} variant="extended" color="secondary">
+        <Add className={classes.extendedIcon} /> メモを作成
       </Fab>
     </>
   );
@@ -119,7 +119,7 @@ function Body(prop: { user: firebase.User }) {
     };
   }, []);
 
-  if (memoData != null && !memoData.length) {
+  if (memoData?.length == 0 ?? false) {
     return (
       <Typography className={classes.typography} component="div">
         <h2 className={classes.hintText}>右下のボタンからメモを作成できます</h2>
@@ -148,7 +148,8 @@ function Memos(props: { memoData: MemoCardProps[] | 'skeleton' }) {
   const classes = useMemoStyle();
 
   if (props.memoData === 'skeleton') {
-    return <MemoCardSkeletons />;
+    //TODO displayCountを更新できるようにする
+    return <MemoCardSkeletons displayCount={5} />;
   }
 
   const cards = props.memoData.map((e) => {

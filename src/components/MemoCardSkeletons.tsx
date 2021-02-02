@@ -17,15 +17,15 @@ const useStyle = makeStyles(() => ({
   },
 }));
 
-export default function MemoCardSkeletons(): JSX.Element {
+export default function MemoCardSkeletons(prop: {
+  displayCount: number;
+}): JSX.Element {
   const classes = useStyle();
-
-  const skeleton = <Skeleton className={classes.card} variant="rect" />;
 
   const list: JSX.Element[] = [];
 
-  for (let i = 0; i < 5; i++) {
-    list.push(skeleton);
+  for (let i = 0; i < prop.displayCount; i++) {
+    list.push(<Skeleton className={classes.card} variant="rect" key={i} />);
   }
 
   return (
