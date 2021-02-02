@@ -6,8 +6,9 @@ import {
   CardContent,
   Modal,
 } from '@material-ui/core';
+import EditMemoCard from './EditMemoCard';
 
-const useMemoCardStyle = makeStyles((theme) => ({
+const useMemoCardStyle = makeStyles(() => ({
   card: {
     width: '100%',
     height: '100%',
@@ -32,17 +33,10 @@ const useMemoCardStyle = makeStyles((theme) => ({
     justifyContent: 'center',
     gap: '1ch',
   },
-  paper: {
-    width: '80%',
-    height: '80%',
-    backgroundColor: theme.palette.background.paper,
-    //border: '2px solid #000',
-    boxShadow: theme.shadows[9],
-    padding: '2ch',
-  },
 }));
 
-interface MemoCardProps {
+export interface MemoCardProps {
+  id: string;
   title: string;
   tags: string[];
   content: string;
@@ -102,11 +96,7 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
       >
-        <Card className={classes.paper}>
-          <h4>{props.tags}</h4>
-          <h2>{props.title}</h2>
-          <h3>{props.content}</h3>
-        </Card>
+        <EditMemoCard memoData={props} />
       </Modal>
     </>
   );

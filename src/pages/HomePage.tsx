@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import MemoCard from '../components/MemoCard';
+import MemoCard, { MemoCardProps } from '../components/MemoCard';
 import { Add } from '@material-ui/icons';
 import { Fab, makeStyles, Typography } from '@material-ui/core';
 import firebase from 'firebase/app';
@@ -62,13 +62,6 @@ function HomePage(): JSX.Element {
       </Fab>
     </>
   );
-}
-
-interface MemoCardProps {
-  id: string;
-  title: string;
-  tags: string[];
-  content: string;
 }
 
 function Body(prop: { user: firebase.User }) {
@@ -154,7 +147,13 @@ function Memos(props: { memoData: MemoCardProps[] | 'skeleton' }) {
 
   const cards = props.memoData.map((e) => {
     return (
-      <MemoCard key={e.id} title={e.title} tags={e.tags} content={e.content} />
+      <MemoCard
+        key={e.id}
+        id={e.id}
+        title={e.title}
+        tags={e.tags}
+        content={e.content}
+      />
     );
   });
 
