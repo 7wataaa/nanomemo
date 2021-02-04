@@ -46,6 +46,7 @@
     ]
   },
   "devDependencies": {
+    "@types/draft-js": "^0.10.44",
     "@types/react-router-dom": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",

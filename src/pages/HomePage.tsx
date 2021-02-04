@@ -105,7 +105,7 @@ function Body(prop: { user: firebase.User }) {
       }
     })();
 
-    console.log('koko');
+    console.log('homePageのuseEffectが動いてるらしい');
 
     return () => {
       unmounted = true;

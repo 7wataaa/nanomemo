@@ -67,7 +67,8 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
   return (
     <>
       <div onClick={handleOpen}>
-        <Card className={classes.card} variant="outlined">
+        <Card className={classes.card} variant="elevation">
+          {/* <LinearProgress /> */}
           <CardContent>
             <Typography
               className={classes.tagnames}
@@ -89,13 +90,7 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
           </CardContent>
         </Card>
       </div>
-      <Modal
-        className={classes.memoModal}
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
+      <Modal className={classes.memoModal} open={open} onClose={handleClose}>
         <EditMemoCard memoData={props} />
       </Modal>
     </>
