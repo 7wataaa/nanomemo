@@ -106,10 +106,21 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
       >
-        <EditMemoCard memoData={props} />
+        <RefEditMemoCard
+          id={props.id}
+          title={props.title}
+          content={props.content}
+          tags={props.tags}
+        ></RefEditMemoCard>
       </Modal>
     </>
   );
 };
+
+const RefEditMemoCard = React.forwardRef<HTMLDivElement, MemoCardProps>(
+  function RefEditMemoCardd(memoData, ref) {
+    return <EditMemoCard memoData={memoData} forwardRef={ref} />;
+  }
+);
 
 export default MemoCard;
