@@ -5,11 +5,19 @@ import {
   Typography,
   CardContent,
   Modal,
+  CardActionArea,
 } from '@material-ui/core';
 import EditMemoCard from './EditMemoCard';
 
 const useMemoCardStyle = makeStyles(() => ({
   card: {
+    width: '100%',
+    height: '100%',
+  },
+  aria: {
+    display: 'flex',
+    alignItems: 'start',
+    justifyContent: 'start',
     width: '100%',
     height: '100%',
   },
@@ -68,25 +76,27 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
     <>
       <div onClick={handleOpen}>
         <Card className={classes.card} variant="outlined">
-          <CardContent>
-            <Typography
-              className={classes.tagnames}
-              color="textSecondary"
-              gutterBottom
-            >
-              {props.tags.join(' ')}
-            </Typography>
-            <Typography className={classes.title} variant="h5" component="h2">
-              {props.title}
-            </Typography>
-            <Typography
-              className={classes.memocontent}
-              variant="body2"
-              component="p"
-            >
-              {props.content}
-            </Typography>
-          </CardContent>
+          <CardActionArea className={classes.aria}>
+            <CardContent>
+              <Typography
+                className={classes.tagnames}
+                color="textSecondary"
+                gutterBottom
+              >
+                {props.tags.join(' ')}
+              </Typography>
+              <Typography className={classes.title} variant="h5" component="h2">
+                {props.title}
+              </Typography>
+              <Typography
+                className={classes.memocontent}
+                variant="body2"
+                component="p"
+              >
+                {props.content}
+              </Typography>
+            </CardContent>
+          </CardActionArea>
         </Card>
       </div>
       <Modal

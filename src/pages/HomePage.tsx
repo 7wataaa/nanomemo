@@ -130,7 +130,7 @@ const useMemoStyle = makeStyles(() => ({
     gridGap: '20px',
     gridAutoRows: '251px',
     gridTemplateColumns: 'repeat(auto-fit, minmax(239px, 0.3fr))',
-    justifyContent: 'center',
+    justifyContent: 'bottom',
   },
 }));
 
