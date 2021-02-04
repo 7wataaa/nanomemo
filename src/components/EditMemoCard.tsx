@@ -32,6 +32,7 @@ const useStyle = makeStyles((theme) => ({
 
 export default function EditMemoCard(props: {
   memoData: MemoCardProps;
+  forwardRef?: React.Ref<HTMLDivElement>;
 }): JSX.Element {
   const classes = useStyle();
 
@@ -97,7 +98,7 @@ export default function EditMemoCard(props: {
   };
 
   return (
-    <div>
+    <div ref={props.forwardRef} tabIndex={-1}>
       {isWritingState ? <LinearProgress /> : null}
       <Card variant="elevation" className={classes.paper}>
         <div className={classes.tagnames}>{props.memoData.tags.join(' ')}</div>

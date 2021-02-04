@@ -5,11 +5,19 @@ import {
   Typography,
   CardContent,
   Modal,
+  CardActionArea,
 } from '@material-ui/core';
 import EditMemoCard from './EditMemoCard';
 
 const useMemoCardStyle = makeStyles(() => ({
   card: {
+    width: '100%',
+    height: '100%',
+  },
+  aria: {
+    display: 'flex',
+    alignItems: 'start',
+    justifyContent: 'start',
     width: '100%',
     height: '100%',
   },
@@ -67,34 +75,52 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
   return (
     <>
       <div onClick={handleOpen}>
-        <Card className={classes.card} variant="elevation">
-          {/* <LinearProgress /> */}
-          <CardContent>
-            <Typography
-              className={classes.tagnames}
-              color="textSecondary"
-              gutterBottom
-            >
-              {props.tags.join(' ')}
-            </Typography>
-            <Typography className={classes.title} variant="h5" component="h2">
-              {props.title}
-            </Typography>
-            <Typography
-              className={classes.memocontent}
-              variant="body2"
-              component="p"
-            >
-              {props.content}
-            </Typography>
-          </CardContent>
+        <Card className={classes.card} variant="outlined">
+          <CardActionArea className={classes.aria}>
+            <CardContent>
+              <Typography
+                className={classes.tagnames}
+                color="textSecondary"
+                gutterBottom
+              >
+                {props.tags.join(' ')}
+              </Typography>
+              <Typography className={classes.title} variant="h5" component="h2">
+                {props.title}
+              </Typography>
+              <Typography
+                className={classes.memocontent}
+                variant="body2"
+                component="p"
+              >
+                {props.content}
+              </Typography>
+            </CardContent>
+          </CardActionArea>
         </Card>
       </div>
-      <Modal className={classes.memoModal} open={open} onClose={handleClose}>
-        <EditMemoCard memoData={props} />
+      <Modal
+        className={classes.memoModal}
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        <RefEditMemoCard
+          id={props.id}
+          title={props.title}
+          content={props.content}
+          tags={props.tags}
+        ></RefEditMemoCard>
       </Modal>
     </>
   );
 };
+
+const RefEditMemoCard = React.forwardRef<HTMLDivElement, MemoCardProps>(
+  function RefEditMemoCardd(memoData, ref) {
+    return <EditMemoCard memoData={memoData} forwardRef={ref} />;
+  }
+);
 
 export default MemoCard;
