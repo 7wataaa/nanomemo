@@ -92,10 +92,10 @@ function Body(prop: { user: firebase.User }) {
           .get()
       ).forEach((docsnapshot) => {
         result.push({
+          id: docsnapshot.id,
+          tags: docsnapshot.get('tags'),
           title: docsnapshot.get('title'),
           content: docsnapshot.get('content'),
-          tags: docsnapshot.get('tags'),
-          id: docsnapshot.id,
         });
       });
 
