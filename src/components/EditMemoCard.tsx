@@ -2,6 +2,8 @@ import { Card, makeStyles, LinearProgress } from '@material-ui/core';
 import React, { useState } from 'react';
 import { MemoCardProps } from './MemoCard';
 import { convertFromRaw, Editor, EditorState } from 'draft-js';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 import 'draft-js/dist/Draft.css';
 
 const useStyle = makeStyles((theme) => ({
@@ -29,6 +31,8 @@ const useStyle = makeStyles((theme) => ({
     overflow: 'hidden',
   },
 }));
+
+let changeTimes = 0;
 
 export default function EditMemoCard(props: {
   memoData: MemoCardProps;
@@ -74,32 +78,60 @@ export default function EditMemoCard(props: {
   );
   const [titleEditorState, settitleEditorState] = useState(initTitleState);
 
-  const [isWritingState, setIsWritingState] = useState(false);
+  const [uploadingState, setUploadingState] = useState<boolean>(false);
 
   const onContentChanged = async (newContentEditorState: EditorState) => {
-    console.log('onChageが動いたってよ');
-
-    if (
-      //フォーカスの場所関係で何かしら起きてて全部通ってしまう
-      contentEditorState.getCurrentContent() ==
-      newContentEditorState.getCurrentContent()
-    ) {
-      console.log('koko');
+    let beforeText = '';
+    for (const b of contentEditorState.getCurrentContent().getBlocksAsArray()) {
+      beforeText = (beforeText + '\n' + b.getText()).trim();
     }
-    //setcontentEditorState(newContentEditorState);
-    /* 
-    await new Promise((resolve) => setTimeout(resolve, 3 * 1000));
 
-    setIsWritingState(true);
+    let afterText = '';
+    for (const b of newContentEditorState
+      .getCurrentContent()
+      .getBlocksAsArray()) {
+      afterText = (afterText + '\n' + b.getText()).trim();
+    }
 
-    await new Promise((resolve) => setTimeout(resolve, 1 * 1000));
+    if (beforeText != afterText) {
+      changeTimes++;
 
-    setIsWritingState(false); */
+      const currentChangeTimes = changeTimes;
+
+      (async (thisTimeChangeTimes) => {
+        await new Promise((resolve) => setTimeout(resolve, 2 * 1000));
+
+        if (thisTimeChangeTimes != changeTimes) {
+          console.log(
+            `呼び出されたときの変更回数(${thisTimeChangeTimes})と現在の変更回数(${changeTimes})が異なるため棄却`
+          );
+          return;
+        }
+
+        console.log('データを送信中...');
+        setUploadingState(true);
+
+        //データ送信
+        //await new Promise((resolve) => setTimeout(resolve, 1 * 1000));
+        await firebase
+          .firestore()
+          .collection('files')
+          .doc(firebase.auth().currentUser?.uid)
+          .collection('userFiles')
+          .doc(props.memoData.id)
+          .set({ content: afterText }, { merge: true });
+
+        console.log(`送信内容 = ${afterText}`);
+
+        setUploadingState(false);
+      })(currentChangeTimes);
+    }
+    setcontentEditorState(newContentEditorState);
   };
 
   return (
     <div ref={props.forwardRef} tabIndex={-1}>
-      {isWritingState ? <LinearProgress /> : null}
+      {uploadingState ? <LinearProgress /> : null}
       <Card variant="elevation" className={classes.paper}>
         <div className={classes.tagnames}>{props.memoData.tags.join(' ')}</div>
         <div className={classes.title}>

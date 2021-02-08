@@ -4,5 +4,12 @@
     "source.fixAll.eslint": true // ファイル保存時にESLintでフォーマット
   },
   "editor.formatOnSave": true,
-  "eslint.run": "onSave"
+  "eslint.run": "onType",
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.hlsearch": true
 }

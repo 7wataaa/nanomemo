@@ -75,7 +75,7 @@ const MemoCard = (props: MemoCardProps): JSX.Element => {
   return (
     <>
       <div onClick={handleOpen}>
-        <Card className={classes.card} variant="outlined">
+        <Card className={classes.card} variant="elevation">
           <CardActionArea className={classes.aria}>
             <CardContent>
               <Typography
