@@ -116,6 +116,8 @@ function HomePage(): JSX.Element {
     if (contentStr.length === 0) {
       console.log('本文がないので作成しない');
 
+      setOpen(false);
+
       return;
     }
 
