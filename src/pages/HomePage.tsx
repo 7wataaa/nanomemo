@@ -12,12 +12,13 @@ import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
-import React, { useMemo, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
 import MemoCard, { MemoCardProps } from '../components/MemoCard';
 import MemoCardSkeletons from '../components/MemoCardSkeletons';
+import '../index';
 
 const useHomePageStyles = makeStyles((theme) => ({
   offset: {
@@ -211,8 +212,6 @@ function HomePage(): JSX.Element {
 
 function Body(prop: { user: firebase.User }) {
   const classes = useHomePageStyles();
-
-  const [memoData, setMemoData] = useState<Array<MemoCardProps> | null>(null);
 
   console.log('koko');
 

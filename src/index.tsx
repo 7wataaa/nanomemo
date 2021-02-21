@@ -1,12 +1,11 @@
+import { Button, CssBaseline, ThemeProvider } from '@material-ui/core';
+import firebase from 'firebase/app';
 import React from 'react';
 import ReactDom from 'react-dom';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { BrowserRouter, Route } from 'react-router-dom';
-
-import { ThemeProvider, CssBaseline } from '@material-ui/core';
-import { myTheme } from './theme';
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import firebase from 'firebase/app';
+import { myTheme } from './theme';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -23,12 +22,46 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 function App() {
+  const [user, loading, error] = useAuthState(firebase.auth());
+
+  if (loading) {
+    return (
+      <div>
+        <p>読込中...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error(error);
+
+    return (
+      <div>
+        <p>エラーが発生しました</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    const login = async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await firebase.auth().signInWithRedirect(provider);
+    };
+
+    return (
+      <Button variant="contained" onClick={login}>
+        Google Signin
+      </Button>
+    );
+  }
+
+  console.log(`uid = ${user.uid}でログイン中`);
+
   return (
     <ThemeProvider theme={myTheme}>
       <CssBaseline />
       <BrowserRouter>
         <Route exact path="/" component={HomePage} />
-        <Route exact path="/login" component={LoginPage} />
       </BrowserRouter>
     </ThemeProvider>
   );
