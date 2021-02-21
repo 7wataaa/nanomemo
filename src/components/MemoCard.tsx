@@ -9,6 +9,7 @@ import {
   LinearProgress,
 } from '@material-ui/core';
 import { convertFromRaw, Editor, EditorState } from 'draft-js';
+import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import { setTimeout } from 'timers';
@@ -77,7 +78,8 @@ export interface MemoCardProps {
   content: string;
 }
 
-let changeTimes = 0;
+let contentChangeTimes = 0;
+let titleChangeTime = 0;
 
 export default function MemoCard(props: MemoCardProps): JSX.Element {
   const classes = useMemoCardStyle();
@@ -89,38 +91,16 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
   };
 
   const handleClose = async () => {
-    //TODO idのdocを読み込んで表示させる
-
-    (async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const document = firebase
-        .firestore()
-        .collection('files')
-        .doc(firebase.auth().currentUser?.uid)
-        .collection('userFiles')
-        .doc(props.id);
-
-      const { title: newTitle, content: newContent, tags: newTags } = (
-        await document.get()
-      ).data() as { title: string; content: string; tags: string[] };
-
-      setContentState(newContent);
-      setTitleState(newTitle);
-      setTagsState(newTags);
-
-      console.log('内容の更新完了');
-    })();
-
-    console.log('koko');
-
     setOpen(false);
   };
 
-  const [titleState, setTitleState] = useState(props.title);
+  /* const [titleState, setTitleState] = useState(props.title);
 
   const [contentState, setContentState] = useState(props.content);
 
-  const [tagsState, setTagsState] = useState(props.tags);
+  const [tagsState, setTagsState] = useState(props.tags); */
+
+  const { tags, title, content } = props;
 
   const [editorCardContentEditorState, setcontentEditorState] = useState(
     EditorState.createWithContent(
@@ -129,7 +109,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         blocks: [
           {
             key: props.id + 'c',
-            text: contentState,
+            text: content,
             type: 'unstyled',
             depth: 0,
             entityRanges: [],
@@ -148,7 +128,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         blocks: [
           {
             key: props.id + 't',
-            text: titleState,
+            text: title,
             type: 'unstyled',
             depth: 0,
             entityRanges: [],
@@ -176,14 +156,14 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     }
 
     if (beforeText != afterText) {
-      changeTimes++;
+      contentChangeTimes++;
 
-      const currentChangeTimes = changeTimes;
+      const currentChangeTimes = contentChangeTimes;
 
       (async (thisTimeChangeTimes) => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        if (thisTimeChangeTimes != changeTimes) {
+        if (thisTimeChangeTimes != contentChangeTimes) {
           return;
         }
 
@@ -205,27 +185,74 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     setcontentEditorState(newtEditorState);
   };
 
+  const onTitleChange = async (newTitleEditorState: EditorState) => {
+    let beforeTitle = '';
+    for (const b of editorCardTitleEditorState
+      .getCurrentContent()
+      .getBlocksAsArray()) {
+      beforeTitle = (beforeTitle + '\n' + b.getText()).trim();
+    }
+
+    let aftorTitle = '';
+    for (const b of newTitleEditorState
+      .getCurrentContent()
+      .getBlocksAsArray()) {
+      aftorTitle = (aftorTitle + '\n' + b.getText()).trim();
+    }
+
+    if (aftorTitle != beforeTitle) {
+      titleChangeTime++;
+
+      const currentChangeTimes = titleChangeTime;
+
+      (async (thisTimeChangeTimes: number) => {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        if (thisTimeChangeTimes != titleChangeTime) {
+          return;
+        }
+
+        setUploadingState(true);
+
+        await firebase
+          .firestore()
+          .collection('files')
+          .doc(firebase.auth().currentUser?.uid)
+          .collection('userFiles')
+          .doc(props.id)
+          .set({ title: aftorTitle }, { merge: true });
+
+        console.log(`送信内容 = ${aftorTitle}`);
+
+        setUploadingState(false);
+      })(currentChangeTimes);
+    }
+    settitleEditorState(newTitleEditorState);
+  };
+
   return (
     <>
       <div onClick={handleOpen}>
         <GridMemoCard
           id={props.id}
-          tags={tagsState}
-          title={titleState}
-          content={contentState}
+          tags={tags}
+          title={title}
+          content={content}
         />
       </div>
       <Modal className={classes.memoModal} open={open} onClose={handleClose}>
         <div tabIndex={-1}>
           {uploadingState ? <LinearProgress /> : null}
-          <Card variant="elevation" className={classes.editCardPaper}>
-            <div className={classes.editCardTagnames}>
-              {tagsState.join(' ')}
-            </div>
+          <Card
+            variant="elevation"
+            className={classes.editCardPaper}
+            tabIndex={-1}
+          >
+            <div className={classes.editCardTagnames}>{tags.join(' ')}</div>
             <div className={classes.editCardTitle}>
               <Editor
                 editorState={editorCardTitleEditorState}
-                onChange={settitleEditorState}
+                onChange={onTitleChange}
               />
             </div>
             <div className={classes.editCardContent}>
