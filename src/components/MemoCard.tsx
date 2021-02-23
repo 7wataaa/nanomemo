@@ -175,7 +175,10 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
           .doc(firebase.auth().currentUser?.uid)
           .collection('userFiles')
           .doc(props.id)
-          .set({ content: afterText }, { merge: true });
+          .set(
+            { content: afterText, lastEditTime: new Date() },
+            { merge: true }
+          );
 
         console.log(`送信内容 = ${afterText}`);
 
@@ -220,7 +223,10 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
           .doc(firebase.auth().currentUser?.uid)
           .collection('userFiles')
           .doc(props.id)
-          .set({ title: aftorTitle }, { merge: true });
+          .set(
+            { title: aftorTitle, lastEditTime: new Date() },
+            { merge: true }
+          );
 
         console.log(`送信内容 = ${aftorTitle}`);
 

@@ -131,6 +131,7 @@ function HomePage(): JSX.Element {
         title: titleStr,
         content: contentStr,
         tags: [],
+        lastEditTime: new Date(),
       });
 
     console.log(
