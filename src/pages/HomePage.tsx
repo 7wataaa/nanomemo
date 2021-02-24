@@ -139,12 +139,28 @@ function HomePage(): JSX.Element {
     );
 
     setOpen(false);
+
+    setTitleEditorState(EditorState.createEmpty());
+    setcontentEditorState(EditorState.createEmpty());
   };
 
   if (!user) {
     console.log('userが空なので/loginにリダイレクト');
     return <Redirect to="/login" />;
   }
+
+  /* useEffect(() => {
+    const func = async () => {
+      await new Promise((resolve) => {
+        //ここで非同期処理が書ける
+        setTimeout(resolve, 1000);
+      });
+
+      console.log('1秒待った');
+    };
+
+    func();
+  }); */
 
   return (
     <>
@@ -214,7 +230,7 @@ function HomePage(): JSX.Element {
 function Body(prop: { user: firebase.User }) {
   const classes = useHomePageStyles();
 
-  console.log('koko');
+  console.log('bodyレンダリング');
 
   /* useMemo(() => {
     console.log('usememo');
