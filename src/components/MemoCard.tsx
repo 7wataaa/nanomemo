@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
 import {
-  makeStyles,
+  Button,
   Card,
-  Typography,
+  CardActions,
   CardContent,
-  Modal,
-  CardActionArea,
+  Dialog,
+  IconButton,
   LinearProgress,
+  makeStyles,
+  Modal,
+  Typography,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import { convertFromRaw, Editor, EditorState } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 import { setTimeout } from 'timers';
 
 const useMemoCardStyle = makeStyles((theme) => ({
@@ -77,6 +85,28 @@ export interface MemoCardProps {
   tags: string[];
   content: string;
 }
+
+const StyledMemoCard = styled(Card)`
+  width: 100%;
+  height: 100%;
+  display: grid;
+  &:hover {
+    background-color: #f4f4f4;
+  }
+`;
+
+const StyledIconButton = styled(IconButton)`
+  ${StyledMemoCard}:hover & {
+    display: block;
+  }
+  display: none;
+  margin-left: auto;
+`;
+
+const StyledCardActions = styled(CardActions)`
+  height: auto;
+  margin-top: auto;
+`;
 
 let contentChangeTimes = 0;
 let titleChangeTime = 0;
@@ -236,16 +266,84 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     settitleEditorState(newTitleEditorState);
   };
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleDeleteDialogOpen = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const deleteDoc = async () => {
+    await firebase
+      .firestore()
+      .collection('files')
+      .doc(firebase.auth().currentUser?.uid)
+      .collection('userFiles')
+      .doc(props.id)
+      .delete();
+  };
+
   return (
     <>
       <div onClick={handleOpen}>
-        <GridMemoCard
-          id={props.id}
-          tags={tags}
-          title={title}
-          content={content}
-        />
+        <StyledMemoCard variant="elevation">
+          <CardContent>
+            <Typography
+              className={classes.tagnames}
+              color="textSecondary"
+              gutterBottom
+            >
+              {props.tags.join(' ')}
+            </Typography>
+            <Typography className={classes.title} variant="h5" component="h2">
+              {props.title}
+            </Typography>
+            <Typography
+              className={classes.memocontent}
+              variant="body2"
+              component="p"
+            >
+              {props.content}
+            </Typography>
+          </CardContent>
+          <StyledCardActions>
+            <StyledIconButton
+              onClick={async (e) => {
+                e.stopPropagation();
+
+                handleDeleteDialogOpen();
+              }}
+            >
+              <Delete />
+            </StyledIconButton>
+          </StyledCardActions>
+        </StyledMemoCard>
       </div>
+
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
+        <DialogTitle>{`"${props.title}"を削除しますか?`}</DialogTitle>
+        <DialogContent>この動作はやり直す事ができません</DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              handleDeleteDialogClose();
+            }}
+          >
+            キャンセル
+          </Button>
+          <Button
+            onClick={() => {
+              deleteDoc();
+            }}
+          >
+            削除
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Modal className={classes.memoModal} open={open} onClose={handleClose}>
         <div tabIndex={-1}>
           {uploadingState ? <LinearProgress /> : null}
@@ -273,33 +371,3 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     </>
   );
 }
-
-const GridMemoCard = (props: MemoCardProps): JSX.Element => {
-  const classes = useMemoCardStyle();
-
-  return (
-    <Card className={classes.card} variant="elevation">
-      <CardActionArea className={classes.aria}>
-        <CardContent>
-          <Typography
-            className={classes.tagnames}
-            color="textSecondary"
-            gutterBottom
-          >
-            {props.tags.join(' ')}
-          </Typography>
-          <Typography className={classes.title} variant="h5" component="h2">
-            {props.title}
-          </Typography>
-          <Typography
-            className={classes.memocontent}
-            variant="body2"
-            component="p"
-          >
-            {props.content}
-          </Typography>
-        </CardContent>
-      </CardActionArea>
-    </Card>
-  );
-};
