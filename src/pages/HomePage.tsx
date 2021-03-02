@@ -14,7 +14,8 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import React, { useState } from 'react';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
-import { Redirect } from 'react-router-dom';
+import ReactTagInput from '@pathofdev/react-tag-input';
+import '@pathofdev/react-tag-input/build/index.css';
 import Header from '../components/Header';
 import MemoCard, { MemoCardProps } from '../components/MemoCard';
 import MemoCardSkeletons from '../components/MemoCardSkeletons';
@@ -74,6 +75,11 @@ const useHomePageStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     gap: '1ch',
   },
+  editCardTagnames: {
+    color: theme.palette.text.secondary,
+    fontSize: 14,
+    marginBottom: 15,
+  },
 }));
 
 function HomePage(): JSX.Element {
@@ -81,7 +87,7 @@ function HomePage(): JSX.Element {
 
   const [creatingState] = useState(false);
 
-  const [contentEditorState, setcontentEditorState] = useState(() =>
+  const [contentEditorState, setContentEditorState] = useState(() =>
     EditorState.createEmpty()
   );
 
@@ -98,7 +104,6 @@ function HomePage(): JSX.Element {
   };
 
   const handleClose = async () => {
-    //TODO 作成画面でもタグの入力ができるようにする
     let contentStr = '';
     for (const str of contentEditorState
       .getCurrentContent()
@@ -131,7 +136,7 @@ function HomePage(): JSX.Element {
       .add({
         title: titleStr,
         content: contentStr,
-        tags: [],
+        tags: createTags,
         lastEditTime: new Date(),
       });
 
@@ -142,26 +147,16 @@ function HomePage(): JSX.Element {
     setOpen(false);
 
     setTitleEditorState(EditorState.createEmpty());
-    setcontentEditorState(EditorState.createEmpty());
+    setContentEditorState(EditorState.createEmpty());
+    setCreateTags([]);
   };
 
   if (!user) {
-    console.log('userが空なので/loginにリダイレクト');
-    return <Redirect to="/login" />;
+    console.log('userが空');
+    throw Error();
   }
 
-  /* useEffect(() => {
-    const func = async () => {
-      await new Promise((resolve) => {
-        //ここで非同期処理が書ける
-        setTimeout(resolve, 1000);
-      });
-
-      console.log('1秒待った');
-    };
-
-    func();
-  }); */
+  const [createTags, setCreateTags] = useState<string[]>([]);
 
   return (
     <>
@@ -193,9 +188,18 @@ function HomePage(): JSX.Element {
               className={classes.createCardPaper}
               tabIndex={-1}
             >
-              {/* <div className={classes.editCardTagnames}>
-              {tagsState.join(' ')}
-            </div> */}
+              <div className={classes.editCardTagnames}>
+                <ReactTagInput
+                  tags={createTags}
+                  onChange={(e) => setCreateTags(e)}
+                  placeholder="input & enter"
+                  removeOnBackspace={true}
+                  editable={true}
+                  validator={(value) =>
+                    !createTags.includes(value) && value.trim() !== ''
+                  }
+                />
+              </div>
               <div className={classes.createCardTitle}>
                 <Editor
                   keyBindingFn={(e) => {
@@ -216,7 +220,7 @@ function HomePage(): JSX.Element {
                 <Editor
                   placeholder="本文は自動で入力されません"
                   editorState={contentEditorState}
-                  onChange={setcontentEditorState}
+                  onChange={setContentEditorState}
                 />
               </div>
             </Card>
