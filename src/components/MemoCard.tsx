@@ -115,8 +115,9 @@ const StyledReactTagInput = styled(ReactTagInput)`
   margin-bottom: 15px;
 `;
 
-let contentChangeTimes = 0;
+let contentChangeTime = 0;
 let titleChangeTime = 0;
+let tagsChangeTime = 0;
 
 export default function MemoCard(props: MemoCardProps): JSX.Element {
   const classes = useMemoCardStyle();
@@ -197,14 +198,14 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     }
 
     if (beforeText != afterText) {
-      contentChangeTimes++;
+      contentChangeTime++;
 
-      const currentChangeTimes = contentChangeTimes;
+      const currentChangeTimes = contentChangeTime;
 
       (async (thisTimeChangeTimes) => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        if (thisTimeChangeTimes != contentChangeTimes) {
+        if (thisTimeChangeTimes != contentChangeTime) {
           return;
         }
 
@@ -299,17 +300,19 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
 
   const [inputTags, setInputTags] = useState(tags);
 
-  console.log(inputTags);
-
-  console.log(tags);
-
   if (JSON.stringify(tags) !== JSON.stringify(inputTags)) {
-    console.log('変更があった');
+    tagsChangeTime++;
+
+    const currentChangeTime = tagsChangeTime;
 
     (async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      console.log('1秒待った');
+      if (currentChangeTime != tagsChangeTime) {
+        return;
+      }
+
+      console.log('新規内容 = ' + inputTags);
       updateDocTags(inputTags);
     })();
   }
