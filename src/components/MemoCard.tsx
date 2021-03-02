@@ -393,12 +393,14 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
               <Editor
                 editorState={editorCardTitleEditorState}
                 onChange={onTitleChange}
+                placeholder="タイトルなし"
               />
             </div>
             <div className={classes.editCardContent}>
               <Editor
                 editorState={editorCardContentEditorState}
                 onChange={onContentChanged}
+                placeholder="本文なし"
               />
             </div>
           </Card>
