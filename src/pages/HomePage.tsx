@@ -98,6 +98,7 @@ function HomePage(): JSX.Element {
   };
 
   const handleClose = async () => {
+    //TODO 作成画面でもタグの入力ができるようにする
     let contentStr = '';
     for (const str of contentEditorState
       .getCurrentContent()
@@ -110,7 +111,7 @@ function HomePage(): JSX.Element {
       titleStr = (titleStr + '\n' + str.getText()).trim();
     }
 
-    if (user == null) {
+    if (!user) {
       throw Error();
     }
 
@@ -178,6 +179,7 @@ function HomePage(): JSX.Element {
       >
         <Add className={classes.extendedIcon} /> メモを作成
       </Fab>
+
       <div tabIndex={-1}>
         <Modal
           className={classes.createModal}

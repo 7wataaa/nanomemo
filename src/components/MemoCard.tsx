@@ -21,6 +21,8 @@ import 'firebase/firestore';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { setTimeout } from 'timers';
+import ReactTagInput from '@pathofdev/react-tag-input';
+import '@pathofdev/react-tag-input/build/index.css';
 
 const useMemoCardStyle = makeStyles((theme) => ({
   card: {
@@ -65,6 +67,7 @@ const useMemoCardStyle = makeStyles((theme) => ({
   editCardTagnames: {
     color: theme.palette.text.secondary,
     fontSize: 14,
+    marginBottom: 15,
   },
   editCardTitle: {
     fontSize: theme.typography.h5.fontSize,
@@ -108,31 +111,39 @@ const StyledCardActions = styled(CardActions)`
   margin-top: auto;
 `;
 
+const StyledReactTagInput = styled(ReactTagInput)`
+  margin-bottom: 15px;
+`;
+
 let contentChangeTimes = 0;
 let titleChangeTime = 0;
 
 export default function MemoCard(props: MemoCardProps): JSX.Element {
   const classes = useMemoCardStyle();
 
-  const [open, setOpen] = useState(false);
+  const [editCardOpen, setEditCardOpen] = useState(false);
 
-  const handleOpen = () => {
-    setOpen(true);
+  const handleEditCardOpen = () => {
+    setEditCardOpen(true);
   };
 
-  const handleClose = async () => {
-    setOpen(false);
+  const handleEditCardClose = () => {
+    setEditCardOpen(false);
   };
 
-  /* const [titleState, setTitleState] = useState(props.title);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const [contentState, setContentState] = useState(props.content);
+  const handleDeleteDialogOpen = () => {
+    setDeleteDialogOpen(true);
+  };
 
-  const [tagsState, setTagsState] = useState(props.tags); */
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+  };
 
   const { tags, title, content } = props;
 
-  const [editorCardContentEditorState, setcontentEditorState] = useState(
+  const [editorCardContentEditorState, setContentEditorState] = useState(
     EditorState.createWithContent(
       convertFromRaw({
         entityMap: {},
@@ -151,7 +162,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     )
   );
 
-  const [editorCardTitleEditorState, settitleEditorState] = useState(
+  const [editorCardTitleEditorState, setTitleEditorState] = useState(
     EditorState.createWithContent(
       convertFromRaw({
         entityMap: {},
@@ -215,7 +226,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         setUploadingState(false);
       })(currentChangeTimes);
     }
-    setcontentEditorState(newtEditorState);
+    setContentEditorState(newtEditorState);
   };
 
   const onTitleChange = async (newTitleEditorState: EditorState) => {
@@ -263,17 +274,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         setUploadingState(false);
       })(currentChangeTimes);
     }
-    settitleEditorState(newTitleEditorState);
-  };
-
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const handleDeleteDialogOpen = () => {
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteDialogClose = () => {
-    setDeleteDialogOpen(false);
+    setTitleEditorState(newTitleEditorState);
   };
 
   const deleteDoc = async () => {
@@ -286,9 +287,36 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       .delete();
   };
 
+  const updateDocTags = async (newTags: string[]) => {
+    await firebase
+      .firestore()
+      .collection('files')
+      .doc(firebase.auth().currentUser?.uid)
+      .collection('userFiles')
+      .doc(props.id)
+      .set({ tags: newTags } as { tags: string[] }, { merge: true });
+  };
+
+  const [inputTags, setInputTags] = useState(tags);
+
+  console.log(inputTags);
+
+  console.log(tags);
+
+  if (JSON.stringify(tags) !== JSON.stringify(inputTags)) {
+    console.log('変更があった');
+
+    (async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log('1秒待った');
+      updateDocTags(inputTags);
+    })();
+  }
+
   return (
     <>
-      <div onClick={handleOpen}>
+      <div onClick={handleEditCardOpen}>
         <StyledMemoCard variant="elevation">
           <CardContent>
             <Typography
@@ -296,17 +324,17 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
               color="textSecondary"
               gutterBottom
             >
-              {props.tags.join(' ')}
+              {tags.map((e) => '#' + e).join(' ') || null}
             </Typography>
             <Typography className={classes.title} variant="h5" component="h2">
-              {props.title}
+              {title}
             </Typography>
             <Typography
               className={classes.memocontent}
               variant="body2"
               component="p"
             >
-              {props.content}
+              {content}
             </Typography>
           </CardContent>
           <StyledCardActions>
@@ -323,28 +351,22 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         </StyledMemoCard>
       </div>
 
+      {/* 削除ダイアログ */}
       <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
         <DialogTitle>{`"${props.title}"を削除しますか?`}</DialogTitle>
         <DialogContent>この動作はやり直す事ができません</DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              handleDeleteDialogClose();
-            }}
-          >
-            キャンセル
-          </Button>
-          <Button
-            onClick={() => {
-              deleteDoc();
-            }}
-          >
-            削除
-          </Button>
+          <Button onClick={handleDeleteDialogClose}>キャンセル</Button>
+          <Button onClick={deleteDoc}>削除</Button>
         </DialogActions>
       </Dialog>
 
-      <Modal className={classes.memoModal} open={open} onClose={handleClose}>
+      {/* 編集カード */}
+      <Modal
+        className={classes.memoModal}
+        open={editCardOpen}
+        onClose={handleEditCardClose}
+      >
         <div tabIndex={-1}>
           {uploadingState ? <LinearProgress /> : null}
           <Card
@@ -352,7 +374,18 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
             className={classes.editCardPaper}
             tabIndex={-1}
           >
-            <div className={classes.editCardTagnames}>{tags.join(' ')}</div>
+            <div className={classes.editCardTagnames}>
+              <StyledReactTagInput
+                tags={inputTags}
+                onChange={(e) => setInputTags(e)}
+                placeholder="input & enter"
+                removeOnBackspace={true}
+                editable={true}
+                validator={(value) =>
+                  !inputTags.includes(value) && value.trim() !== ''
+                }
+              />
+            </div>
             <div className={classes.editCardTitle}>
               <Editor
                 editorState={editorCardTitleEditorState}
