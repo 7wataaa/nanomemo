@@ -16,6 +16,7 @@ import React, { useState } from 'react';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
+import styled from 'styled-components';
 import Header from '../components/Header';
 import MemoCard, { MemoCardProps } from '../components/MemoCard';
 import MemoCardSkeletons from '../components/MemoCardSkeletons';
@@ -158,13 +159,15 @@ function HomePage(): JSX.Element {
 
   const [createTags, setCreateTags] = useState<string[]>([]);
 
+  const [searchStr, setSearchStr] = useState('');
+
   return (
     <>
-      <Header user={user} />
+      <Header user={user} strFunc={setSearchStr} />
 
       <div className={classes.offset} />
 
-      <Body user={user} />
+      <Body user={user} searchStr={searchStr} />
 
       <Fab
         className={classes.fab}
@@ -231,90 +234,19 @@ function HomePage(): JSX.Element {
   );
 }
 
-//let latedMemoData: MemoCardProps[] = [];
+const StyledErrorText = styled.div`
+  color: red;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+`;
 
-function Body(prop: { user: firebase.User }) {
+function Body(prop: { user: firebase.User; searchStr: string }) {
   const classes = useHomePageStyles();
 
   console.log('bodyレンダリング');
 
-  /* useMemo(() => {
-    console.log('usememo');
-    firebase
-      .firestore()
-      .collection('files')
-      .doc(prop.user.uid)
-      .collection('userFiles')
-      .onSnapshot((snapshot) => {
-        let changeResult: MemoCardProps[] = [];
-
-        for (const change of snapshot.docChanges()) {
-          const doc = change.doc;
-
-          const memo = {
-            //kousinnnitijiwomotu
-            id: doc.id,
-            tags: doc.get('tags'),
-            title: doc.get('title'),
-            content: doc.get('content'),
-          };
-          console.log(memo);
-
-          console.log(`change.type = "${change.type}"`);
-          if (change.type === 'added') {
-            //表示内容の追加
-
-            const index = memoData?.map((e) => e.id).indexOf(doc.id) ?? -1;
-
-            if (index !== -1) {
-              console.log(
-                'doc.id がmemoDataの' +
-                  memoData?.map((e) => e.id).indexOf(doc.id) +
-                  'に存在している'
-              );
-              continue;
-            }
-
-            changeResult.push(memo);
-          } else if (change.type === 'modified') {
-            //なぜかmemoDataが空になるのでlatedMemoDataを使う
-            changeResult = latedMemoData.map((value) =>
-              value.id === memo.id ? memo : value
-            );
-          } else if (change.type === 'removed') {
-            if (memoData == null) {
-              console.warn('memodata == null');
-            }
-
-            changeResult = latedMemoData.filter((memo) => memo.id !== doc.id);
-          }
-        }
-
-        if (
-          JSON.stringify(memoData) !== JSON.stringify(changeResult) &&
-          changeResult.length !== 0
-        ) {
-          latedMemoData = changeResult;
-          console.log(changeResult);
-          console.log('are');
-          setMemoData(changeResult);
-          console.log('you');
-          console.log(`1 memoData = ${memoData}`);
-
-      });
-  }, []); */
-  // console.log(`2 memoData = ${memoData}`);
-
-  /* if (memoData?.length == 1 ?? false) {
-    return (
-      <Typography className={classes.typography} component="div">
-        <h3 className={classes.hintText}>右下のボタンからメモを作成できます</h3>
-      </Typography>
-    );
-  }
-  console.log(`3 memoData = ${memoData}`);
-
-  return <Memos memoData={memoData != null ? memoData : 'skeleton'} />; */
+  console.log(`searchStr = ${prop.searchStr}`);
 
   const [value, loading, error] = useCollectionData<MemoCardProps>(
     firebase
@@ -326,13 +258,13 @@ function Body(prop: { user: firebase.User }) {
   );
 
   if (loading) {
-    return <Memos memoData={'skeleton'} />;
+    return <Memos memoData={'skeleton'} searchStr="" />;
   }
 
   if (error) {
     return (
       <Typography className={classes.typography} component="div">
-        <h3 className={classes.hintText}>読み込み時にエラーが発生しました</h3>
+        <StyledErrorText>読み込み時にエラーが発生しました</StyledErrorText>
       </Typography>
     );
   }
@@ -345,44 +277,77 @@ function Body(prop: { user: firebase.User }) {
     );
   }
 
-  return <Memos memoData={value} />;
+  return <Memos memoData={value} searchStr={prop.searchStr} />;
 }
 
-const useMemoStyle = makeStyles(() => ({
-  gridContainer: {
-    margin: '40px',
-    display: 'grid',
-    gridGap: '20px',
-    gridAutoRows: '251px',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(239px, 0.3fr))',
-    justifyContent: 'center',
-  },
-}));
+const StyledMemosDiv = styled.div`
+  margin: 40px 40px 40px 40px;
+  display: grid;
+  grid-gap: 20px;
+  grid-auto-rows: 251px;
+  grid-template-columns: repeat(auto-fit, minmax(239px, 0.3fr));
+  justify-content: center;
+`;
 
 /**
  * @param {MemoCardProps} memoData このリストに入ってる情報でMemoCardたちを作る
  */
-function Memos(props: { memoData: MemoCardProps[] | 'skeleton' }) {
-  const classes = useMemoStyle();
-
+function Memos(props: {
+  memoData: MemoCardProps[] | 'skeleton';
+  searchStr: string;
+}) {
   if (props.memoData === 'skeleton') {
     //TODO displayCountを更新できるようにする
     return <MemoCardSkeletons displayCount={5} />;
   }
 
-  const cards = props.memoData.map((e) => {
-    return (
-      <MemoCard
-        key={e.id}
-        id={e.id}
-        title={e.title}
-        tags={e.tags}
-        content={e.content}
-      />
-    );
-  });
+  const cards: JSX.Element[] = [];
 
-  return <div className={classes.gridContainer}>{cards}</div>;
+  const searchRegExp = RegExp(props.searchStr.trim());
+
+  if (props.searchStr == '') {
+    cards.push(
+      ...props.memoData.map((e) => {
+        return (
+          <MemoCard
+            key={e.id}
+            id={e.id}
+            title={e.title}
+            tags={e.tags}
+            content={e.content}
+          />
+        );
+      })
+    );
+  } else if (props.searchStr.trim()) {
+    cards.push(
+      ...props.memoData
+        .filter((e) => {
+          for (const tag of e.tags) {
+            if (searchRegExp.test('#' + tag)) {
+              return true;
+            }
+          }
+
+          return false;
+        })
+        .map((e) => (
+          <MemoCard
+            key={e.id}
+            id={e.id}
+            title={e.title}
+            tags={e.tags}
+            content={e.content}
+          />
+        ))
+    );
+  }
+
+  return (
+    <>
+      <StyledMemosDiv>{cards}</StyledMemosDiv>
+    </>
+  );
 }
 
 export default HomePage;

@@ -13,6 +13,7 @@ import {
   MenuList,
 } from '@material-ui/core';
 import { Person, Search } from '@material-ui/icons';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import React, { RefObject, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -86,7 +87,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Header = (prop: { user: firebase.User }): JSX.Element => {
+let targetValueChangeTime = 0;
+
+const Header = (prop: {
+  user: firebase.User;
+  strFunc: (str: string) => void;
+}): JSX.Element => {
   const classes = useStyles();
 
   const [open, setOpen] = useState(false);
@@ -159,6 +165,21 @@ const Header = (prop: { user: firebase.User }): JSX.Element => {
               classes={{
                 root: classes.inputRoot,
                 input: classes.inputInput,
+              }}
+              onChange={(e) => {
+                const valueStr = e.target.value;
+
+                targetValueChangeTime++;
+                const currentChangeTime = targetValueChangeTime;
+
+                (async () => {
+                  await new Promise((resolve) => setTimeout(resolve, 250));
+
+                  if (currentChangeTime === targetValueChangeTime) {
+                    console.log(valueStr);
+                    prop.strFunc(valueStr);
+                  }
+                })();
               }}
             />
           </div>
