@@ -205,15 +205,9 @@ function HomePage(): JSX.Element {
               </div>
               <div className={classes.createCardTitle}>
                 <Editor
-                  keyBindingFn={(e) => {
-                    if (e.key === 'Enter') {
-                      console.log('titleで開業できません');
-
-                      return 'tab';
-                    }
-
-                    return getDefaultKeyBinding(e);
-                  }}
+                  keyBindingFn={(e) =>
+                    e.key === 'Enter' ? 'disabled' : getDefaultKeyBinding(e)
+                  }
                   placeholder="タイトルは自動で入力されます"
                   editorState={titleEditorState}
                   onChange={setTitleEditorState}

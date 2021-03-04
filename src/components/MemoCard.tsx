@@ -14,7 +14,14 @@ import {
   DialogActions,
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import { convertFromRaw, Editor, EditorState } from 'draft-js';
+import {
+  convertFromRaw,
+  DraftHandleValue,
+  Editor,
+  EditorState,
+  ContentState,
+  getDefaultKeyBinding,
+} from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -120,6 +127,8 @@ let titleChangeTime = 0;
 let tagsChangeTime = 0;
 
 export default function MemoCard(props: MemoCardProps): JSX.Element {
+  const { tags, title, content } = props;
+
   const classes = useMemoCardStyle();
 
   const [editCardOpen, setEditCardOpen] = useState(false);
@@ -141,8 +150,6 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
   const handleDeleteDialogClose = () => {
     setDeleteDialogOpen(false);
   };
-
-  const { tags, title, content } = props;
 
   const [editorCardContentEditorState, setContentEditorState] = useState(
     EditorState.createWithContent(
@@ -231,21 +238,60 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
   };
 
   const onTitleChange = async (newTitleEditorState: EditorState) => {
+    const regExp = /\n|\r/g;
+
     let beforeTitle = '';
     for (const b of editorCardTitleEditorState
       .getCurrentContent()
       .getBlocksAsArray()) {
-      beforeTitle = (beforeTitle + '\n' + b.getText()).trim();
+      beforeTitle = (beforeTitle + '\n' + b.getText()).trimLeft();
     }
 
-    let aftorTitle = '';
+    beforeTitle = beforeTitle.replace(regExp, ' ');
+
+    let afterTitle = '';
     for (const b of newTitleEditorState
       .getCurrentContent()
       .getBlocksAsArray()) {
-      aftorTitle = (aftorTitle + '\n' + b.getText()).trim();
+      afterTitle = (afterTitle + '\n' + b.getText()).trimLeft();
     }
 
-    if (aftorTitle != beforeTitle) {
+    //afterTitle = afterTitle.replace('\n', ' ');
+    const lines = afterTitle.match(regExp)?.length;
+    console.log('lines = ' + lines);
+
+    afterTitle = afterTitle.replace(regExp, ' ');
+
+    const editerstate = EditorState.push(
+      newTitleEditorState,
+      ContentState.createFromText(afterTitle),
+      'change-block-data'
+    );
+
+    let fixedNewTitleEditorState: EditorState;
+
+    if (!lines) {
+      fixedNewTitleEditorState = newTitleEditorState;
+    } else {
+      fixedNewTitleEditorState = EditorState.moveFocusToEnd(editerstate);
+    }
+
+    /* convertFromRaw({
+        entityMap: {},
+        blocks: [
+          {
+            key: props.id + 't',
+            text: afterTitle,
+            type: 'unstyled',
+            depth: 0,
+            entityRanges: [],
+            inlineStyleRanges: [],
+            data: {},
+          },
+        ],
+      }) */
+
+    if (afterTitle != beforeTitle) {
       titleChangeTime++;
 
       const currentChangeTimes = titleChangeTime;
@@ -266,16 +312,16 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
           .collection('userFiles')
           .doc(props.id)
           .set(
-            { title: aftorTitle, lastEditTime: new Date() },
+            { title: afterTitle, lastEditTime: new Date() },
             { merge: true }
           );
 
-        console.log(`送信内容 = ${aftorTitle}`);
+        console.log(`送信内容 = ${afterTitle}`);
 
         setUploadingState(false);
       })(currentChangeTimes);
     }
-    setTitleEditorState(newTitleEditorState);
+    setTitleEditorState(fixedNewTitleEditorState);
   };
 
   const deleteDoc = async () => {
@@ -394,6 +440,9 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
                 editorState={editorCardTitleEditorState}
                 onChange={onTitleChange}
                 placeholder="タイトルなし"
+                keyBindingFn={(e) =>
+                  e.key === 'Enter' ? 'disabled' : getDefaultKeyBinding(e)
+                }
               />
             </div>
             <div className={classes.editCardContent}>
