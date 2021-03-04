@@ -7,7 +7,12 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
-import { Editor, EditorState, getDefaultKeyBinding } from 'draft-js';
+import {
+  Editor,
+  EditorState,
+  getDefaultKeyBinding,
+  ContentState,
+} from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -104,6 +109,42 @@ function HomePage(): JSX.Element {
     setOpen(true);
   };
 
+  const onTitleChange = (newTitleEditorState: EditorState) => {
+    let beforeTitle = '';
+    for (const b of titleEditorState.getCurrentContent().getBlocksAsArray()) {
+      beforeTitle = (beforeTitle + '\n' + b.getText()).trim();
+    }
+
+    let afterTitle = '';
+    for (const b of newTitleEditorState
+      .getCurrentContent()
+      .getBlocksAsArray()) {
+      afterTitle = (afterTitle + '\n' + b.getText()).trim();
+    }
+
+    const lines = afterTitle.match(/\r|\n/g)?.length;
+
+    afterTitle = afterTitle.replace(/\n|\r/g, ' ');
+
+    console.log(`lines = ${lines}`);
+
+    let fixedNewTitleEditorState: EditorState;
+
+    if (!lines) {
+      fixedNewTitleEditorState = newTitleEditorState;
+    } else {
+      fixedNewTitleEditorState = EditorState.moveFocusToEnd(
+        EditorState.push(
+          newTitleEditorState,
+          ContentState.createFromText(afterTitle),
+          'change-block-data'
+        )
+      );
+    }
+
+    setTitleEditorState(fixedNewTitleEditorState);
+  };
+
   const handleClose = async () => {
     let contentStr = '';
     for (const str of contentEditorState
@@ -117,16 +158,16 @@ function HomePage(): JSX.Element {
       titleStr = (titleStr + '\n' + str.getText()).trim();
     }
 
-    if (!user) {
-      throw Error();
-    }
-
     if (contentStr.length === 0) {
       console.log('本文がないので作成しない');
 
       setOpen(false);
 
       return;
+    }
+
+    if (!user) {
+      throw Error();
     }
 
     await firebase
@@ -152,14 +193,14 @@ function HomePage(): JSX.Element {
     setCreateTags([]);
   };
 
+  const [createTags, setCreateTags] = useState<string[]>([]);
+
+  const [searchStr, setSearchStr] = useState('');
+
   if (!user) {
     console.log('userが空');
     throw Error();
   }
-
-  const [createTags, setCreateTags] = useState<string[]>([]);
-
-  const [searchStr, setSearchStr] = useState('');
 
   return (
     <>
@@ -210,7 +251,7 @@ function HomePage(): JSX.Element {
                   }
                   placeholder="タイトルは自動で入力されます"
                   editorState={titleEditorState}
-                  onChange={setTitleEditorState}
+                  onChange={onTitleChange}
                 />
               </div>
               <div className={classes.createCardContent}>

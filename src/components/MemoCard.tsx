@@ -122,6 +122,8 @@ const StyledReactTagInput = styled(ReactTagInput)`
   margin-bottom: 15px;
 `;
 
+const lineRegExp = /\n|\r/g;
+
 let contentChangeTime = 0;
 let titleChangeTime = 0;
 let tagsChangeTime = 0;
@@ -238,8 +240,6 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
   };
 
   const onTitleChange = async (newTitleEditorState: EditorState) => {
-    const regExp = /\n|\r/g;
-
     let beforeTitle = '';
     for (const b of editorCardTitleEditorState
       .getCurrentContent()
@@ -247,7 +247,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       beforeTitle = (beforeTitle + '\n' + b.getText()).trimLeft();
     }
 
-    beforeTitle = beforeTitle.replace(regExp, ' ');
+    beforeTitle = beforeTitle.replace(lineRegExp, ' ');
 
     let afterTitle = '';
     for (const b of newTitleEditorState
@@ -256,40 +256,23 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       afterTitle = (afterTitle + '\n' + b.getText()).trimLeft();
     }
 
-    //afterTitle = afterTitle.replace('\n', ' ');
-    const lines = afterTitle.match(regExp)?.length;
-    console.log('lines = ' + lines);
+    const lines = afterTitle.match(lineRegExp)?.length;
 
-    afterTitle = afterTitle.replace(regExp, ' ');
-
-    const editerstate = EditorState.push(
-      newTitleEditorState,
-      ContentState.createFromText(afterTitle),
-      'change-block-data'
-    );
+    afterTitle = afterTitle.replace(lineRegExp, ' ');
 
     let fixedNewTitleEditorState: EditorState;
 
     if (!lines) {
       fixedNewTitleEditorState = newTitleEditorState;
     } else {
-      fixedNewTitleEditorState = EditorState.moveFocusToEnd(editerstate);
+      fixedNewTitleEditorState = EditorState.moveFocusToEnd(
+        EditorState.push(
+          newTitleEditorState,
+          ContentState.createFromText(afterTitle),
+          'change-block-data'
+        )
+      );
     }
-
-    /* convertFromRaw({
-        entityMap: {},
-        blocks: [
-          {
-            key: props.id + 't',
-            text: afterTitle,
-            type: 'unstyled',
-            depth: 0,
-            entityRanges: [],
-            inlineStyleRanges: [],
-            data: {},
-          },
-        ],
-      }) */
 
     if (afterTitle != beforeTitle) {
       titleChangeTime++;
@@ -358,7 +341,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         return;
       }
 
-      console.log('新規内容 = ' + inputTags);
+      console.log('新規tag内容 = ' + inputTags);
       updateDocTags(inputTags);
     })();
   }
