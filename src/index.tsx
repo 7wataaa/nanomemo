@@ -1,4 +1,9 @@
-import { Button, CssBaseline, ThemeProvider } from '@material-ui/core';
+import {
+  Button,
+  CssBaseline,
+  ThemeProvider as MuiThemeProvider,
+} from '@material-ui/core';
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import firebase from 'firebase/app';
 import React from 'react';
 import ReactDom from 'react-dom';
@@ -58,12 +63,14 @@ function App() {
   console.log(`uid = ${user.uid}でログイン中`);
 
   return (
-    <ThemeProvider theme={myTheme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Route exact path="/" component={HomePage} />
-      </BrowserRouter>
-    </ThemeProvider>
+    <MuiThemeProvider theme={myTheme}>
+      <StyledThemeProvider theme={myTheme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Route exact path="/" component={HomePage} />
+        </BrowserRouter>
+      </StyledThemeProvider>
+    </MuiThemeProvider>
   );
 }
 

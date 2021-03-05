@@ -12,14 +12,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Paper,
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import {
   convertFromRaw,
-  DraftHandleValue,
   Editor,
   EditorState,
-  ContentState,
   getDefaultKeyBinding,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
@@ -65,7 +64,7 @@ const useMemoCardStyle = makeStyles((theme) => ({
   },
   editCardPaper: {
     width: '500px',
-    minHeight: '500px',
+    minHeight: '200px',
     height: 'auto',
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[9],
@@ -110,19 +109,64 @@ const StyledIconButton = styled(IconButton)`
     display: block;
   }
   display: none;
-  margin-left: auto;
 `;
 
 const StyledCardActions = styled(CardActions)`
+  position: sticky;
+  right: 0;
+  bottom: 0;
   height: auto;
   margin-top: auto;
+  display: flex;
+  flex-direction: row-reverse;
+`;
+
+const StyledCardContent = styled(Typography)`
+  width: 100%;
+  height: 100%;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`;
+
+const StyledCardTitle = styled(Typography)`
+  margin-bottom: 12px;
+`;
+
+const StyledEditCardContent = styled.div`
+  width: 100%;
+
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  overflow: hidden;
 `;
 
 const StyledReactTagInput = styled(ReactTagInput)`
-  margin-bottom: 15px;
+  margin-bottom: 0px;
 `;
 
-const lineRegExp = /\n|\r/g;
+const StyledDeleteDialogPaper = styled(Paper)`
+  min-width: 500px;
+`;
+
+const StyledModal = styled(Modal)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1ch;
+`;
+
+const StyledEditCard = styled(Card)`
+  width: 500px;
+  min-height: 200px;
+  background-color: ${(props) => props.theme.palette.background.paper};
+  box-shadow: ${(props) => props.theme.shadows[9]};
+  padding: 2ch;
+  overflow: auto;
+`;
+
+const line = /\n|\r/g;
 
 let contentChangeTime = 0;
 let titleChangeTime = 0;
@@ -153,7 +197,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     setDeleteDialogOpen(false);
   };
 
-  const [editorCardContentEditorState, setContentEditorState] = useState(
+  const [editCardContentEditorState, setContentEditorState] = useState(
     EditorState.createWithContent(
       convertFromRaw({
         entityMap: {},
@@ -172,7 +216,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     )
   );
 
-  const [editorCardTitleEditorState, setTitleEditorState] = useState(
+  const [editCardTitleEditorState, setTitleEditorState] = useState(
     EditorState.createWithContent(
       convertFromRaw({
         entityMap: {},
@@ -193,18 +237,13 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
 
   const [uploadingState, setUploadingState] = useState<boolean>(false);
 
-  const onContentChanged = async (newtEditorState: EditorState) => {
-    let beforeText = '';
-    for (const b of editorCardContentEditorState
+  const onContentChanged = async (newEditorState: EditorState) => {
+    console.log('honbun');
+    const beforeText = editCardContentEditorState
       .getCurrentContent()
-      .getBlocksAsArray()) {
-      beforeText = (beforeText + '\n' + b.getText()).trim();
-    }
+      .getPlainText();
 
-    let afterText = '';
-    for (const b of newtEditorState.getCurrentContent().getBlocksAsArray()) {
-      afterText = (afterText + '\n' + b.getText()).trim();
-    }
+    const afterText = newEditorState.getCurrentContent().getPlainText();
 
     if (beforeText != afterText) {
       contentChangeTime++;
@@ -231,48 +270,26 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
             { merge: true }
           );
 
-        console.log(`送信内容 = ${afterText}`);
+        console.log(`honnbun送信内容 = ${afterText}`);
 
         setUploadingState(false);
       })(currentChangeTimes);
     }
-    setContentEditorState(newtEditorState);
+    setContentEditorState(newEditorState);
   };
 
   const onTitleChange = async (newTitleEditorState: EditorState) => {
-    let beforeTitle = '';
-    for (const b of editorCardTitleEditorState
+    console.log('title');
+
+    const beforeTitle = editCardTitleEditorState
       .getCurrentContent()
-      .getBlocksAsArray()) {
-      beforeTitle = (beforeTitle + '\n' + b.getText()).trimLeft();
-    }
+      .getPlainText()
+      .replace(line, ' ');
 
-    beforeTitle = beforeTitle.replace(lineRegExp, ' ');
-
-    let afterTitle = '';
-    for (const b of newTitleEditorState
+    const afterTitle = newTitleEditorState
       .getCurrentContent()
-      .getBlocksAsArray()) {
-      afterTitle = (afterTitle + '\n' + b.getText()).trimLeft();
-    }
-
-    const lines = afterTitle.match(lineRegExp)?.length;
-
-    afterTitle = afterTitle.replace(lineRegExp, ' ');
-
-    let fixedNewTitleEditorState: EditorState;
-
-    if (!lines) {
-      fixedNewTitleEditorState = newTitleEditorState;
-    } else {
-      fixedNewTitleEditorState = EditorState.moveFocusToEnd(
-        EditorState.push(
-          newTitleEditorState,
-          ContentState.createFromText(afterTitle),
-          'change-block-data'
-        )
-      );
-    }
+      .getPlainText()
+      .replace(line, ' ');
 
     if (afterTitle != beforeTitle) {
       titleChangeTime++;
@@ -304,7 +321,32 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
         setUploadingState(false);
       })(currentChangeTimes);
     }
-    setTitleEditorState(fixedNewTitleEditorState);
+
+    if (line.test(newTitleEditorState.getCurrentContent().getPlainText())) {
+      setTitleEditorState(
+        EditorState.moveFocusToEnd(
+          EditorState.createWithContent(
+            convertFromRaw({
+              entityMap: {},
+              blocks: [
+                {
+                  key: props.id + 't',
+                  text: afterTitle,
+                  type: 'unstyled',
+                  depth: 0,
+                  entityRanges: [],
+                  inlineStyleRanges: [],
+                  data: {},
+                },
+              ],
+            })
+          )
+        )
+      );
+      return;
+    }
+
+    setTitleEditorState(newTitleEditorState);
   };
 
   const deleteDoc = async () => {
@@ -348,43 +390,35 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
 
   return (
     <>
-      <div onClick={handleEditCardOpen}>
-        <StyledMemoCard variant="elevation">
-          <CardContent>
-            <Typography
-              className={classes.tagnames}
-              color="textSecondary"
-              gutterBottom
-            >
-              {tags.map((e) => '#' + e).join(' ') || null}
-            </Typography>
-            <Typography className={classes.title} variant="h5" component="h2">
-              {title}
-            </Typography>
-            <Typography
-              className={classes.memocontent}
-              variant="body2"
-              component="p"
-            >
-              {content}
-            </Typography>
-          </CardContent>
-          <StyledCardActions>
-            <StyledIconButton
-              onClick={async (e) => {
-                e.stopPropagation();
+      <StyledMemoCard variant="elevation" onClick={handleEditCardOpen}>
+        <CardContent>
+          <StyledCardTitle color="textSecondary">
+            {tags.map((e) => '#' + e).join(' ') || null}
+          </StyledCardTitle>
+          <Typography className={classes.title} variant="h5" component="h2">
+            {title}
+          </Typography>
+          <StyledCardContent variant="body2">{content}</StyledCardContent>
+        </CardContent>
+        <StyledCardActions>
+          <StyledIconButton
+            onClick={async (e) => {
+              e.stopPropagation();
 
-                handleDeleteDialogOpen();
-              }}
-            >
-              <Delete />
-            </StyledIconButton>
-          </StyledCardActions>
-        </StyledMemoCard>
-      </div>
+              handleDeleteDialogOpen();
+            }}
+          >
+            <Delete />
+          </StyledIconButton>
+        </StyledCardActions>
+      </StyledMemoCard>
 
       {/* 削除ダイアログ */}
-      <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
+      <Dialog
+        PaperComponent={StyledDeleteDialogPaper}
+        open={deleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+      >
         <DialogTitle>{`"${props.title}"を削除しますか?`}</DialogTitle>
         <DialogContent>この動作はやり直す事ができません</DialogContent>
         <DialogActions>
@@ -394,14 +428,10 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       </Dialog>
 
       {/* 編集カード */}
-      <Modal
-        className={classes.memoModal}
-        open={editCardOpen}
-        onClose={handleEditCardClose}
-      >
-        <div tabIndex={-1}>
+      <StyledModal open={editCardOpen} onClose={handleEditCardClose}>
+        <>
           {uploadingState ? <LinearProgress /> : null}
-          <Card
+          <StyledEditCard
             variant="elevation"
             className={classes.editCardPaper}
             tabIndex={-1}
@@ -420,7 +450,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
             </div>
             <div className={classes.editCardTitle}>
               <Editor
-                editorState={editorCardTitleEditorState}
+                editorState={editCardTitleEditorState}
                 onChange={onTitleChange}
                 placeholder="タイトルなし"
                 keyBindingFn={(e) =>
@@ -428,16 +458,16 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
                 }
               />
             </div>
-            <div className={classes.editCardContent}>
+            <StyledEditCardContent>
               <Editor
-                editorState={editorCardContentEditorState}
+                editorState={editCardContentEditorState}
                 onChange={onContentChanged}
                 placeholder="本文なし"
               />
-            </div>
-          </Card>
-        </div>
-      </Modal>
+            </StyledEditCardContent>
+          </StyledEditCard>
+        </>
+      </StyledModal>
     </>
   );
 }
