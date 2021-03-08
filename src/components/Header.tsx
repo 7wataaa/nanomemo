@@ -199,7 +199,6 @@ const Header = (prop: {
                       onClick={(event) => {
                         handleClose(event);
                         firebase.auth().signOut();
-                        location.href = '/';
                       }}
                       key={1}
                     >
