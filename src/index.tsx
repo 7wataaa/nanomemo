@@ -1,16 +1,17 @@
+import React from 'react';
+import ReactDom from 'react-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
+import firebase from 'firebase/app';
 import {
-  Button,
   CssBaseline,
   ThemeProvider as MuiThemeProvider,
 } from '@material-ui/core';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import firebase from 'firebase/app';
-import React from 'react';
-import ReactDom from 'react-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { BrowserRouter, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+
 import { myTheme } from './theme';
+import HomePage from './pages/HomePage';
+import SignInPage from './pages/SignInPage';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -54,9 +55,12 @@ function App() {
     };
 
     return (
-      <Button variant="contained" onClick={login}>
-        Google Signin
-      </Button>
+      <MuiThemeProvider theme={myTheme}>
+        <StyledThemeProvider theme={myTheme}>
+          <CssBaseline />
+          <SignInPage signInFunc={login} />
+        </StyledThemeProvider>
+      </MuiThemeProvider>
     );
   }
 
