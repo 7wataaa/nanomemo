@@ -49,7 +49,7 @@ const StyledPrtition = styled.div`
 
 const StyledPartition1 = styled.div`
   height: 32px;
-  border-bottom: 0.9px solid #707070;
+  border-bottom: 0.9px solid #b5b5b5;
 `;
 
 const StyledPartition2 = styled.div`
@@ -70,13 +70,15 @@ const StyledPartitionText = styled.div`
 
 const StyledSignInButton = styled(Button)`
   width: 100%;
+  height: 52px;
 `;
 
-const StyledSignUpRouteAnchor = styled.a`
+const StyledSignUpRouteButton = styled(Button)`
   position: fixed;
-  bottom: 12px;
+  bottom: 10px;
   right: 20px;
-  font-size: 18px;
+  font-size: 15px;
+  text-transform: none;
 `;
 
 export default function SignInPage(props: {
@@ -123,11 +125,13 @@ export default function SignInPage(props: {
         </form>
       </StyledFormsGridDiv>
 
-      <StyledSignUpRouteAnchor
+      <StyledSignUpRouteButton
+        variant="text"
+        size="small"
         onClick={() => console.log('ここでサインアップ画面に行く')}
       >
         Sign Up
-      </StyledSignUpRouteAnchor>
+      </StyledSignUpRouteButton>
     </StyledWelcomeCard>
   );
 }
