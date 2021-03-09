@@ -58,7 +58,7 @@ function App() {
       <MuiThemeProvider theme={myTheme}>
         <StyledThemeProvider theme={myTheme}>
           <CssBaseline />
-          <SignInPage signInFunc={login} />
+          <SignInPage googleSignInFunc={login} />
         </StyledThemeProvider>
       </MuiThemeProvider>
     );
