@@ -61,7 +61,6 @@ function App() {
       </div>
     );
   }
-
   console.log(`user.uid = ${user?.uid}` ?? '未ログイン状態です');
 
   return (

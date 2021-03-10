@@ -98,7 +98,14 @@ export default function SignUpPage(props: {
   const confirmFormError = password !== confirmPassword;
 
   const handleButtonOnClick = () => {
-    if (emailFormError || passwordFormError || confirmFormError) {
+    if (
+      emailFormError ||
+      passwordFormError ||
+      confirmFormError ||
+      emailStr.length === 0 ||
+      password.length === 0 ||
+      confirmPassword.length === 0
+    ) {
       return;
     }
 
