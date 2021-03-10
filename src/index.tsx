@@ -79,7 +79,11 @@ function App() {
           )}
         />
 
-        <Route exact path="/sign-up" render={() => <SignUpPage />} />
+        <Route
+          exact
+          path="/sign-up"
+          render={() => <SignUpPage googleSignInFunc={googleLogin} />}
+        />
       </Switch>
     </BrowserRouter>
   );
