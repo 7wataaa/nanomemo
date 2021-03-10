@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, Card, TextField } from '@material-ui/core';
 import { GoogleLoginButton } from 'react-social-login-buttons';
@@ -84,7 +84,12 @@ const StyledSignUpRouteButton = styled(Button)`
 
 export default function SignInPage(props: {
   googleSignInFunc: () => Promise<void>;
+  isLogin: boolean;
 }): JSX.Element {
+  if (props.isLogin) {
+    return <Redirect to="/" />;
+  }
+
   return (
     <StyledWelcomeCard>
       <StyledNanomemoDiv>

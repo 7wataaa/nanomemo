@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import firebase from 'firebase/app';
 import {
   CssBaseline,
@@ -28,6 +28,11 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+const googleLogin = async () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  await firebase.auth().signInWithRedirect(provider);
+};
+
 function App() {
   const [user, loading, error] = useAuthState(firebase.auth());
 
@@ -49,28 +54,33 @@ function App() {
     );
   }
 
-  if (!user) {
-    const googleLogin = async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await firebase.auth().signInWithRedirect(provider);
-    };
-
-    return (
-      <BrowserRouter>
-        <Route
-          path="/sign-in"
-          render={() => <SignInPage googleSignInFunc={googleLogin} />}
-        />
-        <Route path="/sign-up" render={() => <SignUpPage />} />
-      </BrowserRouter>
-    );
-  }
-
-  console.log(`uid = ${user.uid}でログイン中`);
+  console.log(`user.uid = ${user?.uid}` ?? '未ログイン状態です');
 
   return (
     <BrowserRouter>
-      <Route exact path="/" component={HomePage} />
+      <Switch>
+        <Route
+          exact
+          path="/"
+          render={() => {
+            const user = firebase.auth().currentUser;
+            return !user ? <Redirect to="/sign-in" /> : <HomePage />;
+          }}
+        />
+
+        <Route
+          exact
+          path="/sign-in"
+          render={() => (
+            <SignInPage
+              googleSignInFunc={googleLogin}
+              isLogin={Boolean(user)}
+            />
+          )}
+        />
+
+        <Route exact path="/sign-up" render={() => <SignUpPage />} />
+      </Switch>
     </BrowserRouter>
   );
 }
