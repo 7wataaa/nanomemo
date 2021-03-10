@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, Card, TextField } from '@material-ui/core';
 import { GoogleLoginButton } from 'react-social-login-buttons';
+
+const isEmailAddress = (str: string) =>
+  /^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(
+    str
+  );
 
 const StyledSignUpCard = styled(Card)`
   background-color: #fff;
@@ -78,6 +83,11 @@ const StyledSignInRouteButton = styled(Button)`
 export default function SignUpPage(props: {
   googleSignInFunc: () => Promise<void>;
 }): JSX.Element {
+  const [emailStr, setEmailStr] = useState('');
+
+  const [password, setPassword] = useState('');
+  const [ConfirmPassword, setConfirmPassword] = useState('');
+
   return (
     <StyledSignUpCard>
       <StyledNanomemoDiv>nanomemo</StyledNanomemoDiv>
@@ -96,13 +106,20 @@ export default function SignUpPage(props: {
           label="email"
           type="email"
           required
+          value={emailStr}
+          onChange={(e) => setEmailStr(e.target.value)}
+          error={!(emailStr.length === 0) && !isEmailAddress(emailStr)}
         />
 
         <StyledTextField
           variant="outlined"
           label="Password"
           type="password"
+          placeholder="最低8文字必要です"
           required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={!(password.length === 0) && password.length < 8}
         />
 
         <StyledTextField
@@ -110,6 +127,8 @@ export default function SignUpPage(props: {
           label="Password 確認"
           type="password"
           required
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          error={password !== ConfirmPassword}
         />
 
         <StyledSignUpButton
