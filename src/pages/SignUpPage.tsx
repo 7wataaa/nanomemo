@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, Card, TextField } from '@material-ui/core';
 import { GoogleLoginButton } from 'react-social-login-buttons';
@@ -82,11 +82,32 @@ const StyledSignInRouteButton = styled(Button)`
 
 export default function SignUpPage(props: {
   googleSignInFunc: () => Promise<void>;
+  createEmailSignInUser: (email: string, password: string) => Promise<void>;
+  isLogin: boolean;
 }): JSX.Element {
   const [emailStr, setEmailStr] = useState('');
 
   const [password, setPassword] = useState('');
-  const [ConfirmPassword, setConfirmPassword] = useState('');
+
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const emailFormError = !(emailStr.length === 0) && !isEmailAddress(emailStr);
+
+  const passwordFormError = !(password.length === 0) && password.length < 8;
+
+  const confirmFormError = password !== confirmPassword;
+
+  const handleButtonOnClick = () => {
+    if (emailFormError || passwordFormError || confirmFormError) {
+      return;
+    }
+
+    props.createEmailSignInUser(emailStr, password);
+  };
+
+  if (props.isLogin) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <StyledSignUpCard>
@@ -108,7 +129,7 @@ export default function SignUpPage(props: {
           required
           value={emailStr}
           onChange={(e) => setEmailStr(e.target.value)}
-          error={!(emailStr.length === 0) && !isEmailAddress(emailStr)}
+          error={emailFormError}
         />
 
         <StyledTextField
@@ -119,7 +140,7 @@ export default function SignUpPage(props: {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          error={!(password.length === 0) && password.length < 8}
+          error={passwordFormError}
         />
 
         <StyledTextField
@@ -128,14 +149,14 @@ export default function SignUpPage(props: {
           type="password"
           required
           onChange={(e) => setConfirmPassword(e.target.value)}
-          error={password !== ConfirmPassword}
+          error={confirmFormError}
         />
 
         <StyledSignUpButton
           variant="contained"
           color="secondary"
           size="large"
-          onClick={() => console.log('ここでメアドサインアップ')}
+          onClick={handleButtonOnClick}
         >
           確認メールを送信
         </StyledSignUpButton>

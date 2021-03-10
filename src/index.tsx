@@ -33,6 +33,14 @@ const googleLogin = async () => {
   await firebase.auth().signInWithRedirect(provider);
 };
 
+const createEmailSignInUser = async (email: string, password: string) => {
+  try {
+    await firebase.auth().createUserWithEmailAndPassword(email, password);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 function App() {
   const [user, loading, error] = useAuthState(firebase.auth());
 
@@ -82,7 +90,13 @@ function App() {
         <Route
           exact
           path="/sign-up"
-          render={() => <SignUpPage googleSignInFunc={googleLogin} />}
+          render={() => (
+            <SignUpPage
+              googleSignInFunc={googleLogin}
+              createEmailSignInUser={createEmailSignInUser}
+              isLogin={Boolean(user)}
+            />
+          )}
         />
       </Switch>
     </BrowserRouter>
