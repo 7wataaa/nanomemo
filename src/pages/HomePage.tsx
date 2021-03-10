@@ -340,7 +340,7 @@ function Memos(props: {
 
   const searchRegExp = RegExp(props.searchStr.trim());
 
-  if (props.searchStr == '') {
+  if (props.searchStr === '') {
     cards.push(
       ...props.memoData.map((e) => {
         return (

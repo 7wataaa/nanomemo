@@ -1,16 +1,18 @@
+import React from 'react';
+import ReactDom from 'react-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import firebase from 'firebase/app';
 import {
-  Button,
   CssBaseline,
   ThemeProvider as MuiThemeProvider,
 } from '@material-ui/core';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import firebase from 'firebase/app';
-import React from 'react';
-import ReactDom from 'react-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { BrowserRouter, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+
 import { myTheme } from './theme';
+import HomePage from './pages/HomePage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -25,6 +27,11 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+const googleLogin = async () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  await firebase.auth().signInWithRedirect(provider);
+};
 
 function App() {
   const [user, loading, error] = useAuthState(firebase.auth());
@@ -47,31 +54,49 @@ function App() {
     );
   }
 
-  if (!user) {
-    const login = async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await firebase.auth().signInWithRedirect(provider);
-    };
-
-    return (
-      <Button variant="contained" onClick={login}>
-        Google Signin
-      </Button>
-    );
-  }
-
-  console.log(`uid = ${user.uid}でログイン中`);
+  console.log(`user.uid = ${user?.uid}` ?? '未ログイン状態です');
 
   return (
-    <MuiThemeProvider theme={myTheme}>
-      <StyledThemeProvider theme={myTheme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <Route exact path="/" component={HomePage} />
-        </BrowserRouter>
-      </StyledThemeProvider>
-    </MuiThemeProvider>
+    <BrowserRouter>
+      <Switch>
+        <Route
+          exact
+          path="/"
+          render={() => {
+            const user = firebase.auth().currentUser;
+            return !user ? <Redirect to="/sign-in" /> : <HomePage />;
+          }}
+        />
+
+        <Route
+          exact
+          path="/sign-in"
+          render={() => (
+            <SignInPage
+              googleSignInFunc={googleLogin}
+              isLogin={Boolean(user)}
+            />
+          )}
+        />
+
+        <Route
+          exact
+          path="/sign-up"
+          render={() => <SignUpPage googleSignInFunc={googleLogin} />}
+        />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
-ReactDom.render(<App />, document.getElementById('root'));
+ReactDom.render(
+  <>
+    <MuiThemeProvider theme={myTheme}>
+      <StyledThemeProvider theme={myTheme}>
+        <CssBaseline />
+        <App />
+      </StyledThemeProvider>
+    </MuiThemeProvider>
+  </>,
+  document.getElementById('root')
+);

@@ -156,7 +156,7 @@ const Header = (prop: {
       <AppBar className={classes.appbar}>
         <Toolbar className={classes.toolbar}>
           <Typography variant="h6" className={classes.title}>
-            memoapp
+            nanomemo
           </Typography>
           <div className={classes.search}>
             <Search className={classes.searchIcon} />
@@ -199,7 +199,6 @@ const Header = (prop: {
                       onClick={(event) => {
                         handleClose(event);
                         firebase.auth().signOut();
-                        location.href = '/';
                       }}
                       key={1}
                     >

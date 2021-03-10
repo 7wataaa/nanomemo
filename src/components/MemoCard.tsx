@@ -245,7 +245,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
 
     const afterText = newEditorState.getCurrentContent().getPlainText();
 
-    if (beforeText != afterText) {
+    if (beforeText !== afterText) {
       contentChangeTime++;
 
       const currentChangeTimes = contentChangeTime;
@@ -253,7 +253,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       (async (thisTimeChangeTimes) => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        if (thisTimeChangeTimes != contentChangeTime) {
+        if (thisTimeChangeTimes !== contentChangeTime) {
           return;
         }
 
@@ -291,7 +291,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       .getPlainText()
       .replace(line, ' ');
 
-    if (afterTitle != beforeTitle) {
+    if (afterTitle !== beforeTitle) {
       titleChangeTime++;
 
       const currentChangeTimes = titleChangeTime;
@@ -299,7 +299,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
       (async (thisTimeChangeTimes: number) => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        if (thisTimeChangeTimes != titleChangeTime) {
+        if (thisTimeChangeTimes !== titleChangeTime) {
           return;
         }
 
@@ -379,7 +379,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     (async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      if (currentChangeTime != tagsChangeTime) {
+      if (currentChangeTime !== tagsChangeTime) {
         return;
       }
 
