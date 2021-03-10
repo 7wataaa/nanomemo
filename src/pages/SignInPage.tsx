@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, Card, TextField } from '@material-ui/core';
 import { GoogleLoginButton } from 'react-social-login-buttons';
@@ -125,13 +126,11 @@ export default function SignInPage(props: {
         </form>
       </StyledFormsGridDiv>
 
-      <StyledSignUpRouteButton
-        variant="text"
-        size="small"
-        onClick={() => console.log('ここでサインアップ画面に行く')}
-      >
-        Sign Up
-      </StyledSignUpRouteButton>
+      <Link to="/sign-up">
+        <StyledSignUpRouteButton variant="text" size="small">
+          Sign Up
+        </StyledSignUpRouteButton>
+      </Link>
     </StyledWelcomeCard>
   );
 }

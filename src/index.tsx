@@ -12,6 +12,7 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { myTheme } from './theme';
 import HomePage from './pages/HomePage';
 import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -49,33 +50,39 @@ function App() {
   }
 
   if (!user) {
-    const login = async () => {
+    const googleLogin = async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       await firebase.auth().signInWithRedirect(provider);
     };
 
     return (
-      <MuiThemeProvider theme={myTheme}>
-        <StyledThemeProvider theme={myTheme}>
-          <CssBaseline />
-          <SignInPage googleSignInFunc={login} />
-        </StyledThemeProvider>
-      </MuiThemeProvider>
+      <BrowserRouter>
+        <Route
+          path="/sign-in"
+          render={() => <SignInPage googleSignInFunc={googleLogin} />}
+        />
+        <Route path="/sign-up" render={() => <SignUpPage />} />
+      </BrowserRouter>
     );
   }
 
   console.log(`uid = ${user.uid}でログイン中`);
 
   return (
-    <MuiThemeProvider theme={myTheme}>
-      <StyledThemeProvider theme={myTheme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <Route exact path="/" component={HomePage} />
-        </BrowserRouter>
-      </StyledThemeProvider>
-    </MuiThemeProvider>
+    <BrowserRouter>
+      <Route exact path="/" component={HomePage} />
+    </BrowserRouter>
   );
 }
 
-ReactDom.render(<App />, document.getElementById('root'));
+ReactDom.render(
+  <>
+    <MuiThemeProvider theme={myTheme}>
+      <StyledThemeProvider theme={myTheme}>
+        <CssBaseline />
+        <App />
+      </StyledThemeProvider>
+    </MuiThemeProvider>
+  </>,
+  document.getElementById('root')
+);
