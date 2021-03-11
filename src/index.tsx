@@ -1,16 +1,17 @@
+import React from 'react';
+import ReactDom from 'react-dom';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import firebase from 'firebase/app';
 import {
-  Button,
   CssBaseline,
   ThemeProvider as MuiThemeProvider,
 } from '@material-ui/core';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import firebase from 'firebase/app';
-import React from 'react';
-import ReactDom from 'react-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { BrowserRouter, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { myTheme } from './theme';
+import HomePage from './pages/HomePage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -25,6 +26,82 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+const googleLogin = async () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  await firebase.auth().signInWithRedirect(provider);
+};
+
+const createEmailSignInUser = async (email: string, password: string) => {
+  let userCredentialResult;
+
+  try {
+    userCredentialResult = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
+  } catch (e) {
+    const errorCode = e.code;
+
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        alert(
+          'このメールアドレスはすでに使用されています。別のメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/invalid-email':
+        alert(
+          'このメールアドレスは無効です。正しいメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/operation-not-allowed':
+        alert('メールアドレス認証は現在使用できません。');
+        break;
+
+      case 'auth/weak-password':
+        alert(
+          'パスワードを変更してやり直してください。攻撃に対して脆弱な可能性があります。'
+        );
+        break;
+    }
+
+    console.log(e);
+  }
+
+  return userCredentialResult?.user ?? null;
+};
+
+const emailAndPasswordSignIn = async (email: string, password: string) => {
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+  } catch (e) {
+    const errorCode = e.code;
+
+    switch (errorCode) {
+      //TODO alertじゃなくする
+      case 'auth/invalid-email':
+        alert(
+          'このメールアドレスは無効です。正しいメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/user-disabled':
+        alert('このアカウントは使用できません。');
+        break;
+
+      case 'auth/user-not-found':
+        alert('メールアドレスまたはパスワードが間違っています。');
+        break;
+
+      case 'auth/wrong-password':
+        alert('メールアドレスまたはパスワードが間違っています。');
+        break;
+    }
+
+    console.log(e);
+  }
+};
 
 function App() {
   const [user, loading, error] = useAuthState(firebase.auth());
@@ -47,31 +124,56 @@ function App() {
     );
   }
 
-  if (!user) {
-    const login = async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await firebase.auth().signInWithRedirect(provider);
-    };
-
-    return (
-      <Button variant="contained" onClick={login}>
-        Google Signin
-      </Button>
-    );
-  }
-
-  console.log(`uid = ${user.uid}でログイン中`);
+  console.log(`user.uid = ${user?.uid}` ?? '未ログイン状態です');
 
   return (
-    <MuiThemeProvider theme={myTheme}>
-      <StyledThemeProvider theme={myTheme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <Route exact path="/" component={HomePage} />
-        </BrowserRouter>
-      </StyledThemeProvider>
-    </MuiThemeProvider>
+    <BrowserRouter>
+      <Switch>
+        <Route
+          exact
+          path="/"
+          render={() => {
+            const user = firebase.auth().currentUser;
+            return !user ? <Redirect to="/sign-in" /> : <HomePage />;
+          }}
+        />
+
+        <Route
+          exact
+          path="/sign-in"
+          render={() => (
+            <SignInPage
+              googleSignInFunc={googleLogin}
+              emailAndPasswordSignInFunc={emailAndPasswordSignIn}
+              authUser={user}
+            />
+          )}
+        />
+
+        <Route
+          exact
+          path="/sign-up"
+          render={() => (
+            <SignUpPage
+              googleSignInFunc={googleLogin}
+              createEmailSignInUser={createEmailSignInUser}
+              authUser={user}
+            />
+          )}
+        />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
-ReactDom.render(<App />, document.getElementById('root'));
+ReactDom.render(
+  <>
+    <MuiThemeProvider theme={myTheme}>
+      <StyledThemeProvider theme={myTheme}>
+        <CssBaseline />
+        <App />
+      </StyledThemeProvider>
+    </MuiThemeProvider>
+  </>,
+  document.getElementById('root')
+);

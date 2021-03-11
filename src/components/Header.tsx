@@ -80,6 +80,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       marginRight: '50px',
     },
+    color: '#000',
   },
   paper: {
     position: 'relative',
@@ -129,8 +130,9 @@ const Header = (prop: {
     prevOpen.current = open;
   }, [open]);
 
-  const userAvatar = (user: firebase.User | null) => {
-    if (user?.photoURL != null) {
+  const userAvatar = (user: firebase.User) => {
+    console.log(user.email);
+    if (user.photoURL != null) {
       return (
         <Avatar
           className={classes.avatar}
@@ -138,6 +140,10 @@ const Header = (prop: {
           aria-haspopup={true}
         />
       );
+    } else if ((user.email?.length !== 0 && user.email !== null) ?? false) {
+      console.log(user.email?.charAt(0).toUpperCase());
+      const avaterChar = user.email?.charAt(0).toUpperCase();
+      return <Avatar className={classes.avatar}>{avaterChar}</Avatar>;
     } else {
       return (
         <Avatar className={classes.avatar}>
@@ -156,7 +162,7 @@ const Header = (prop: {
       <AppBar className={classes.appbar}>
         <Toolbar className={classes.toolbar}>
           <Typography variant="h6" className={classes.title}>
-            memoapp
+            nanomemo
           </Typography>
           <div className={classes.search}>
             <Search className={classes.searchIcon} />
@@ -199,7 +205,6 @@ const Header = (prop: {
                       onClick={(event) => {
                         handleClose(event);
                         firebase.auth().signOut();
-                        location.href = '/';
                       }}
                       key={1}
                     >
