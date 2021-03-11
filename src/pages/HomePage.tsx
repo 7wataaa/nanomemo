@@ -202,6 +202,8 @@ function HomePage(): JSX.Element {
     throw Error();
   }
 
+  //TODO ここで未確認のemailを弾くかサインインボタンを押したときから弾いて未確認emailでアカウント動作させないようにする
+
   return (
     <>
       <Header user={user} strFunc={setSearchStr} />

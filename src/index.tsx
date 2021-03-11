@@ -37,7 +37,33 @@ const createEmailSignInUser = async (email: string, password: string) => {
   try {
     await firebase.auth().createUserWithEmailAndPassword(email, password);
   } catch (e) {
-    console.error(e);
+    const errorCode = e.code;
+
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        alert(
+          'このメールアドレスはすでに使用されています。別のメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/invalid-email':
+        alert(
+          'このメールアドレスは無効です。別のメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/operation-not-allowed':
+        alert('メールアドレス認証は現在使用できません。');
+        break;
+
+      case 'auth/weak-password':
+        alert(
+          'パスワードを変更してやり直してください。攻撃に対して脆弱な可能性があります。'
+        );
+        break;
+    }
+
+    console.log(e);
   }
 };
 
