@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, Card, TextField } from '@material-ui/core';
@@ -84,11 +84,39 @@ const StyledSignUpRouteButton = styled(Button)`
 
 export default function SignInPage(props: {
   googleSignInFunc: () => Promise<void>;
-  isLogin: boolean;
+  emailAndPasswordSignInFunc: (
+    email: string,
+    password: string
+  ) => Promise<void>;
+  authUser: firebase.default.User;
 }): JSX.Element {
-  if (props.isLogin) {
+  if (props.authUser && props.authUser.emailVerified) {
     return <Redirect to="/" />;
   }
+
+  const [emailStr, setEmailStr] = useState('');
+
+  const [password, setPassword] = useState('');
+
+  const emailFormError =
+    !(emailStr.length === 0) &&
+    !/^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(
+      emailStr
+    );
+  const passwordFormError = !(password.length === 0) && password.length < 8;
+
+  const handleButtonOnClick = async () => {
+    if (
+      emailFormError ||
+      passwordFormError ||
+      emailStr.length === 0 ||
+      password.length === 0
+    ) {
+      return;
+    }
+
+    await props.emailAndPasswordSignInFunc(emailStr, password);
+  };
 
   return (
     <StyledWelcomeCard>
@@ -111,6 +139,10 @@ export default function SignInPage(props: {
             label="email"
             type="email"
             required
+            autoComplete="username"
+            value={emailStr}
+            error={emailFormError}
+            onChange={(e) => setEmailStr(e.target.value)}
           />
 
           <StyledTextField
@@ -118,22 +150,26 @@ export default function SignInPage(props: {
             label="Password"
             type="password"
             required
+            autoComplete="current-password"
+            value={password}
+            error={passwordFormError}
+            onChange={(e) => setPassword(e.target.value)}
           />
-
-          <StyledSignInButton
-            variant="contained"
-            color="secondary"
-            size="large"
-            onClick={() => console.log('ここでメアドログイン')}
-          >
-            Sign in
-          </StyledSignInButton>
         </form>
+
+        <StyledSignInButton
+          variant="contained"
+          color="secondary"
+          size="large"
+          onClick={handleButtonOnClick}
+        >
+          サインイン
+        </StyledSignInButton>
       </StyledFormsGridDiv>
 
       <Link to="/sign-up">
         <StyledSignUpRouteButton variant="text" size="small">
-          Sign Up
+          新規登録
         </StyledSignUpRouteButton>
       </Link>
     </StyledWelcomeCard>

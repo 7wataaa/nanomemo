@@ -8,7 +8,6 @@ import {
 } from '@material-ui/core';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-
 import { myTheme } from './theme';
 import HomePage from './pages/HomePage';
 import SignInPage from './pages/SignInPage';
@@ -31,6 +30,77 @@ firebase.initializeApp(firebaseConfig);
 const googleLogin = async () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   await firebase.auth().signInWithRedirect(provider);
+};
+
+const createEmailSignInUser = async (email: string, password: string) => {
+  let userCredentialResult;
+
+  try {
+    userCredentialResult = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
+  } catch (e) {
+    const errorCode = e.code;
+
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        alert(
+          'このメールアドレスはすでに使用されています。別のメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/invalid-email':
+        alert(
+          'このメールアドレスは無効です。正しいメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/operation-not-allowed':
+        alert('メールアドレス認証は現在使用できません。');
+        break;
+
+      case 'auth/weak-password':
+        alert(
+          'パスワードを変更してやり直してください。攻撃に対して脆弱な可能性があります。'
+        );
+        break;
+    }
+
+    console.log(e);
+  }
+
+  return userCredentialResult?.user ?? null;
+};
+
+const emailAndPasswordSignIn = async (email: string, password: string) => {
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+  } catch (e) {
+    const errorCode = e.code;
+
+    switch (errorCode) {
+      //TODO alertじゃなくする
+      case 'auth/invalid-email':
+        alert(
+          'このメールアドレスは無効です。正しいメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/user-disabled':
+        alert('このアカウントは使用できません。');
+        break;
+
+      case 'auth/user-not-found':
+        alert('メールアドレスまたはパスワードが間違っています。');
+        break;
+
+      case 'auth/wrong-password':
+        alert('メールアドレスまたはパスワードが間違っています。');
+        break;
+    }
+
+    console.log(e);
+  }
 };
 
 function App() {
@@ -74,7 +144,8 @@ function App() {
           render={() => (
             <SignInPage
               googleSignInFunc={googleLogin}
-              isLogin={Boolean(user)}
+              emailAndPasswordSignInFunc={emailAndPasswordSignIn}
+              authUser={user}
             />
           )}
         />
@@ -82,7 +153,13 @@ function App() {
         <Route
           exact
           path="/sign-up"
-          render={() => <SignUpPage googleSignInFunc={googleLogin} />}
+          render={() => (
+            <SignUpPage
+              googleSignInFunc={googleLogin}
+              createEmailSignInUser={createEmailSignInUser}
+              authUser={user}
+            />
+          )}
         />
       </Switch>
     </BrowserRouter>
