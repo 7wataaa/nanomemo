@@ -111,6 +111,7 @@ export default function SignInPage(props: {
             label="email"
             type="email"
             required
+            autoComplete="username"
           />
 
           <StyledTextField
@@ -118,17 +119,18 @@ export default function SignInPage(props: {
             label="Password"
             type="password"
             required
+            autoComplete="current-password"
           />
-
-          <StyledSignInButton
-            variant="contained"
-            color="secondary"
-            size="large"
-            onClick={() => console.log('ここでメアドログイン')}
-          >
-            Sign in
-          </StyledSignInButton>
         </form>
+
+        <StyledSignInButton
+          variant="contained"
+          color="secondary"
+          size="large"
+          onClick={() => console.log('ここでメアドログイン')}
+        >
+          Sign in
+        </StyledSignInButton>
       </StyledFormsGridDiv>
 
       <Link to="/sign-up">

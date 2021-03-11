@@ -165,35 +165,40 @@ export default function SignUpPage(props: {
             <StyledPartitionText>or</StyledPartitionText>
           </StyledPrtition>
 
-          <StyledTextField
-            variant="outlined"
-            label="email"
-            type="email"
-            required
-            value={emailStr}
-            onChange={(e) => setEmailStr(e.target.value)}
-            error={emailFormError}
-          />
+          <form>
+            <StyledTextField
+              variant="outlined"
+              label="email"
+              type="email"
+              required
+              value={emailStr}
+              onChange={(e) => setEmailStr(e.target.value)}
+              error={emailFormError}
+              autoComplete="username"
+            />
 
-          <StyledTextField
-            variant="outlined"
-            label="Password"
-            type="password"
-            placeholder="最低8文字必要です"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={passwordFormError}
-          />
+            <StyledTextField
+              variant="outlined"
+              label="Password"
+              type="password"
+              placeholder="最低8文字必要です"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={passwordFormError}
+              autoComplete="new-password"
+            />
 
-          <StyledTextField
-            variant="outlined"
-            label="Password 確認"
-            type="password"
-            required
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            error={confirmFormError}
-          />
+            <StyledTextField
+              variant="outlined"
+              label="Password 確認"
+              type="password"
+              required
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              error={confirmFormError}
+              autoComplete="new-password"
+            />
+          </form>
 
           <StyledSignUpButton
             variant="contained"
