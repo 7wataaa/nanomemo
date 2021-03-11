@@ -212,7 +212,7 @@ export default function SignUpPage(props: {
 
         <Link to="/sign-in">
           <StyledSignInRouteButton variant="text" size="small">
-            Sign in
+            ログイン
           </StyledSignInRouteButton>
         </Link>
       </StyledSignUpCard>
