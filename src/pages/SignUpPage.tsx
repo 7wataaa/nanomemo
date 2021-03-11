@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
-import styled from 'styled-components';
 import {
+  Backdrop,
   Button,
   Card,
-  TextField,
+  CircularProgress,
   Dialog,
-  DialogTitle,
+  DialogActions,
   DialogContent,
   DialogContentText,
-  DialogActions,
+  DialogTitle,
+  TextField,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { Link, Redirect } from 'react-router-dom';
 import { GoogleLoginButton } from 'react-social-login-buttons';
+import styled from 'styled-components';
 
 const isEmailAddress = (str: string) =>
   /^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(
@@ -89,23 +91,27 @@ const StyledSignInRouteButton = styled(Button)`
   text-transform: none;
 `;
 
+const StyledSendingBackdrop = styled(Backdrop)`
+  z-index: ${(props) => props.theme.zIndex.drawer + 1};
+`;
+
 export default function SignUpPage(props: {
   googleSignInFunc: () => Promise<void>;
-  createEmailSignInUser: (email: string, password: string) => Promise<boolean>;
+  createEmailSignInUser: (
+    email: string,
+    password: string
+  ) => Promise<firebase.default.User | null>;
   authUser: firebase.default.User;
 }): JSX.Element {
   const [sendDialogOpen, setsendDialogOpen] = useState(false);
+  const [sendingBackDropOpen, setSendingBackDropOpen] = useState(false);
 
   const [emailStr, setEmailStr] = useState('');
-
   const [password, setPassword] = useState('');
-
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const emailFormError = !(emailStr.length === 0) && !isEmailAddress(emailStr);
-
   const passwordFormError = !(password.length === 0) && password.length < 8;
-
   const confirmFormError = password !== confirmPassword;
 
   const handleButtonOnClick = async () => {
@@ -120,14 +126,21 @@ export default function SignUpPage(props: {
       return;
     }
 
-    const createSuccessful = await props.createEmailSignInUser(
-      emailStr,
-      password
-    );
+    const user = await props.createEmailSignInUser(emailStr, password);
 
-    if (createSuccessful) {
-      setsendDialogOpen(true);
+    //登録が失敗している場合
+    if (!user) {
+      return;
     }
+
+    setSendingBackDropOpen(true);
+
+    //TODO urlを設定して戻ってこられるようにする
+    await user.sendEmailVerification();
+
+    setSendingBackDropOpen(false);
+
+    setsendDialogOpen(true);
   };
 
   const handleSendDialogClose = () => {
@@ -209,6 +222,10 @@ export default function SignUpPage(props: {
 
         <DialogActions></DialogActions>
       </Dialog>
+
+      <StyledSendingBackdrop open={sendingBackDropOpen}>
+        <CircularProgress color="inherit" />
+      </StyledSendingBackdrop>
     </>
   );
 }

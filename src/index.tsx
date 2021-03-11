@@ -8,7 +8,6 @@ import {
 } from '@material-ui/core';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-
 import { myTheme } from './theme';
 import HomePage from './pages/HomePage';
 import SignInPage from './pages/SignInPage';
@@ -34,12 +33,13 @@ const googleLogin = async () => {
 };
 
 const createEmailSignInUser = async (email: string, password: string) => {
-  let createSuccessful = true;
+  let userCredentialResult;
 
   try {
-    await firebase.auth().createUserWithEmailAndPassword(email, password);
+    userCredentialResult = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
   } catch (e) {
-    createSuccessful = false;
     const errorCode = e.code;
 
     switch (errorCode) {
@@ -69,7 +69,7 @@ const createEmailSignInUser = async (email: string, password: string) => {
     console.log(e);
   }
 
-  return createSuccessful;
+  return userCredentialResult?.user ?? null;
 };
 
 function App() {
@@ -92,6 +92,7 @@ function App() {
       </div>
     );
   }
+
   console.log(`user.uid = ${user?.uid}` ?? '未ログイン状態です');
 
   return (
