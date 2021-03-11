@@ -34,9 +34,12 @@ const googleLogin = async () => {
 };
 
 const createEmailSignInUser = async (email: string, password: string) => {
+  let createSuccessful = true;
+
   try {
     await firebase.auth().createUserWithEmailAndPassword(email, password);
   } catch (e) {
+    createSuccessful = false;
     const errorCode = e.code;
 
     switch (errorCode) {
@@ -65,6 +68,8 @@ const createEmailSignInUser = async (email: string, password: string) => {
 
     console.log(e);
   }
+
+  return createSuccessful;
 };
 
 function App() {
@@ -119,7 +124,7 @@ function App() {
             <SignUpPage
               googleSignInFunc={googleLogin}
               createEmailSignInUser={createEmailSignInUser}
-              isLogin={Boolean(user)}
+              authUser={user}
             />
           )}
         />

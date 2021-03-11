@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
-import { Button, Card, TextField } from '@material-ui/core';
+import {
+  Button,
+  Card,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from '@material-ui/core';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 const isEmailAddress = (str: string) =>
@@ -82,9 +91,11 @@ const StyledSignInRouteButton = styled(Button)`
 
 export default function SignUpPage(props: {
   googleSignInFunc: () => Promise<void>;
-  createEmailSignInUser: (email: string, password: string) => Promise<void>;
-  isLogin: boolean;
+  createEmailSignInUser: (email: string, password: string) => Promise<boolean>;
+  authUser: firebase.default.User;
 }): JSX.Element {
+  const [sendDialogOpen, setsendDialogOpen] = useState(false);
+
   const [emailStr, setEmailStr] = useState('');
 
   const [password, setPassword] = useState('');
@@ -97,7 +108,7 @@ export default function SignUpPage(props: {
 
   const confirmFormError = password !== confirmPassword;
 
-  const handleButtonOnClick = () => {
+  const handleButtonOnClick = async () => {
     if (
       emailFormError ||
       passwordFormError ||
@@ -109,71 +120,95 @@ export default function SignUpPage(props: {
       return;
     }
 
-    props.createEmailSignInUser(emailStr, password);
+    const createSuccessful = await props.createEmailSignInUser(
+      emailStr,
+      password
+    );
+
+    if (createSuccessful) {
+      setsendDialogOpen(true);
+    }
   };
 
-  if (props.isLogin) {
+  const handleSendDialogClose = () => {
+    console.log('このダイアログは閉じない');
+  };
+
+  if (props.authUser && props.authUser.emailVerified) {
     return <Redirect to="/" />;
   }
 
   return (
-    <StyledSignUpCard>
-      <StyledNanomemoDiv>nanomemo</StyledNanomemoDiv>
+    <>
+      <StyledSignUpCard>
+        <StyledNanomemoDiv>nanomemo</StyledNanomemoDiv>
 
-      <StyledFormsGridDiv>
-        <GoogleLoginButton onClick={props.googleSignInFunc} />
+        <StyledFormsGridDiv>
+          <GoogleLoginButton onClick={props.googleSignInFunc} />
 
-        <StyledPrtition>
-          <StyledPartition1 />
-          <StyledPartition2 />
-          <StyledPartitionText>or</StyledPartitionText>
-        </StyledPrtition>
+          <StyledPrtition>
+            <StyledPartition1 />
+            <StyledPartition2 />
+            <StyledPartitionText>or</StyledPartitionText>
+          </StyledPrtition>
 
-        <StyledTextField
-          variant="outlined"
-          label="email"
-          type="email"
-          required
-          value={emailStr}
-          onChange={(e) => setEmailStr(e.target.value)}
-          error={emailFormError}
-        />
+          <StyledTextField
+            variant="outlined"
+            label="email"
+            type="email"
+            required
+            value={emailStr}
+            onChange={(e) => setEmailStr(e.target.value)}
+            error={emailFormError}
+          />
 
-        <StyledTextField
-          variant="outlined"
-          label="Password"
-          type="password"
-          placeholder="最低8文字必要です"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={passwordFormError}
-        />
+          <StyledTextField
+            variant="outlined"
+            label="Password"
+            type="password"
+            placeholder="最低8文字必要です"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={passwordFormError}
+          />
 
-        <StyledTextField
-          variant="outlined"
-          label="Password 確認"
-          type="password"
-          required
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          error={confirmFormError}
-        />
+          <StyledTextField
+            variant="outlined"
+            label="Password 確認"
+            type="password"
+            required
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={confirmFormError}
+          />
 
-        <StyledSignUpButton
-          variant="contained"
-          color="secondary"
-          size="large"
-          onClick={handleButtonOnClick}
-        >
-          確認メールを送信
-        </StyledSignUpButton>
-      </StyledFormsGridDiv>
+          <StyledSignUpButton
+            variant="contained"
+            color="secondary"
+            size="large"
+            onClick={handleButtonOnClick}
+          >
+            確認メールを送信
+          </StyledSignUpButton>
+        </StyledFormsGridDiv>
 
-      <Link to="/sign-in">
-        <StyledSignInRouteButton variant="text" size="small">
-          Sign in
-        </StyledSignInRouteButton>
-      </Link>
-    </StyledSignUpCard>
+        <Link to="/sign-in">
+          <StyledSignInRouteButton variant="text" size="small">
+            Sign in
+          </StyledSignInRouteButton>
+        </Link>
+      </StyledSignUpCard>
+      <Dialog open={sendDialogOpen} onClose={handleSendDialogClose}>
+        <DialogTitle>確認メールを送信しました</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            本人確認メールを送信しました。記載のURLをクリックしてサインアップを完了してください。メールが届いていない場合は迷惑メールフォルダに届いている可能性があります。
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions></DialogActions>
+      </Dialog>
+    </>
   );
 }
