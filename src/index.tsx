@@ -110,10 +110,7 @@ function App() {
           exact
           path="/sign-in"
           render={() => (
-            <SignInPage
-              googleSignInFunc={googleLogin}
-              isLogin={Boolean(user)}
-            />
+            <SignInPage googleSignInFunc={googleLogin} authUser={user} />
           )}
         />
 

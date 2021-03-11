@@ -84,9 +84,9 @@ const StyledSignUpRouteButton = styled(Button)`
 
 export default function SignInPage(props: {
   googleSignInFunc: () => Promise<void>;
-  isLogin: boolean;
+  authUser: firebase.default.User;
 }): JSX.Element {
-  if (props.isLogin) {
+  if (props.authUser && props.authUser.emailVerified) {
     return <Redirect to="/" />;
   }
 
