@@ -51,7 +51,7 @@ const createEmailSignInUser = async (email: string, password: string) => {
 
       case 'auth/invalid-email':
         alert(
-          'このメールアドレスは無効です。別のメールアドレスをご使用ください。'
+          'このメールアドレスは無効です。正しいメールアドレスをご使用ください。'
         );
         break;
 
@@ -70,6 +70,37 @@ const createEmailSignInUser = async (email: string, password: string) => {
   }
 
   return userCredentialResult?.user ?? null;
+};
+
+const emailAndPasswordSignIn = async (email: string, password: string) => {
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+  } catch (e) {
+    const errorCode = e.code;
+
+    switch (errorCode) {
+      //TODO alertじゃなくする
+      case 'auth/invalid-email':
+        alert(
+          'このメールアドレスは無効です。正しいメールアドレスをご使用ください。'
+        );
+        break;
+
+      case 'auth/user-disabled':
+        alert('このアカウントは使用できません。');
+        break;
+
+      case 'auth/user-not-found':
+        alert('メールアドレスまたはパスワードが間違っています。');
+        break;
+
+      case 'auth/wrong-password':
+        alert('メールアドレスまたはパスワードが間違っています。');
+        break;
+    }
+
+    console.log(e);
+  }
 };
 
 function App() {
@@ -111,7 +142,11 @@ function App() {
           exact
           path="/sign-in"
           render={() => (
-            <SignInPage googleSignInFunc={googleLogin} authUser={user} />
+            <SignInPage
+              googleSignInFunc={googleLogin}
+              emailAndPasswordSignInFunc={emailAndPasswordSignIn}
+              authUser={user}
+            />
           )}
         />
 
