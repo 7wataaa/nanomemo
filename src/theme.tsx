@@ -9,10 +9,7 @@ export const myTheme = createMuiTheme({
       contrastText: '#ffffff',
     },
     secondary: {
-      light: '#ffffff',
-      main: '#ede7f6',
-      dark: '#bbb5c3',
-      contrastText: '#000000',
+      main: '#37474f',
     },
     background: {
       default: '#E9ECEF',
