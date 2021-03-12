@@ -104,6 +104,10 @@ const StyledMemoCard = styled(Card)`
   }
 `;
 
+const StyledCardContent = styled(CardContent)`
+  overflow: hidden;
+`;
+
 const StyledIconButton = styled(IconButton)`
   ${StyledMemoCard}:hover & {
     display: block;
@@ -121,7 +125,7 @@ const StyledCardActions = styled(CardActions)`
   flex-direction: row-reverse;
 `;
 
-const StyledCardContent = styled(Typography)`
+const StyledCardContentText = styled(Typography)`
   width: 100%;
   height: 100%;
   overflow-wrap: break-word;
@@ -391,15 +395,17 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
   return (
     <>
       <StyledMemoCard variant="elevation" onClick={handleEditCardOpen}>
-        <CardContent>
+        <StyledCardContent>
           <StyledCardTitle color="textSecondary">
             {tags.map((e) => '#' + e).join(' ') || null}
           </StyledCardTitle>
           <Typography className={classes.title} variant="h5" component="h2">
             {title}
           </Typography>
-          <StyledCardContent variant="body2">{content}</StyledCardContent>
-        </CardContent>
+          <StyledCardContentText variant="body2">
+            {content}
+          </StyledCardContentText>
+        </StyledCardContent>
         <StyledCardActions>
           <StyledIconButton
             onClick={async (e) => {
