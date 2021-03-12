@@ -170,6 +170,12 @@ function HomePage(): JSX.Element {
       return;
     }
 
+    if (titleStr.length === 0) {
+      //contentStrの1行目か1行目のの9文字目までをいれる
+
+      titleStr = contentStr.split(/\r|\n/)[0].substr(0, 20).trim();
+    }
+
     if (!user) {
       throw Error();
     }
