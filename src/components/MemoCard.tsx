@@ -12,10 +12,11 @@ import {
   makeStyles,
   Modal,
   Paper,
+  TextField,
   Typography,
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import ReactTagInput from '@pathofdev/react-tag-input';
+import { Autocomplete } from '@material-ui/lab';
 import '@pathofdev/react-tag-input/build/index.css';
 import {
   convertFromRaw,
@@ -104,6 +105,10 @@ const StyledMemoCard = styled(Card)`
   }
 `;
 
+const StyledCardContent = styled(CardContent)`
+  overflow: hidden;
+`;
+
 const StyledIconButton = styled(IconButton)`
   ${StyledMemoCard}:hover & {
     display: block;
@@ -121,7 +126,7 @@ const StyledCardActions = styled(CardActions)`
   flex-direction: row-reverse;
 `;
 
-const StyledCardContent = styled(Typography)`
+const StyledCardContentText = styled(Typography)`
   width: 100%;
   height: 100%;
   overflow-wrap: break-word;
@@ -141,7 +146,7 @@ const StyledEditCardContent = styled.div`
   overflow: hidden;
 `;
 
-const StyledReactTagInput = styled(ReactTagInput)`
+const StyledTagInputForm = styled(Autocomplete)`
   margin-bottom: 0px;
 `;
 
@@ -391,15 +396,17 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
   return (
     <>
       <StyledMemoCard variant="elevation" onClick={handleEditCardOpen}>
-        <CardContent>
+        <StyledCardContent>
           <StyledCardTitle color="textSecondary">
             {tags.map((e) => '#' + e).join(' ') || null}
           </StyledCardTitle>
           <Typography className={classes.title} variant="h5" component="h2">
             {title}
           </Typography>
-          <StyledCardContent variant="body2">{content}</StyledCardContent>
-        </CardContent>
+          <StyledCardContentText variant="body2">
+            {content}
+          </StyledCardContentText>
+        </StyledCardContent>
         <StyledCardActions>
           <StyledIconButton
             onClick={async (e) => {
@@ -437,16 +444,17 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
             tabIndex={-1}
           >
             <div className={classes.editCardTagnames}>
-              <StyledReactTagInput
-                tags={inputTags}
-                onChange={(e) => setInputTags(e)}
-                placeholder="input & enter"
-                removeOnBackspace={true}
-                editable={true}
-                validator={(value) =>
-                  !inputTags.includes(value) && value.trim() !== ''
-                }
-              />
+              <StyledTagInputForm
+                freeSolo
+                multiple
+                size="small"
+                renderInput={(params) => {
+                  return <TextField {...params} variant="outlined" />;
+                }}
+                value={inputTags}
+                onChange={(_, value) => setInputTags(value as string[])}
+                options={[]}
+              ></StyledTagInputForm>
             </div>
             <div className={classes.editCardTitle}>
               <Editor
