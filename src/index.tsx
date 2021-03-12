@@ -12,6 +12,7 @@ import { myTheme } from './theme';
 import HomePage from './pages/HomePage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import LoadingPage from './pages/LoadingPage';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -107,11 +108,7 @@ function App() {
   const [user, loading, error] = useAuthState(firebase.auth());
 
   if (loading) {
-    return (
-      <div>
-        <p>読込中...</p>
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   if (error) {

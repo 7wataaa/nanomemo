@@ -14,13 +14,13 @@ import {
   ContentState,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
+import { Redirect } from 'react-router-dom';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import ReactTagInput from '@pathofdev/react-tag-input';
-import '@pathofdev/react-tag-input/build/index.css';
 import styled from 'styled-components';
 import Header from '../components/Header';
 import MemoCard, { MemoCardProps } from '../components/MemoCard';
@@ -211,8 +211,6 @@ function HomePage(): JSX.Element {
     console.log('userが空');
     throw Error();
   }
-
-  //TODO ここで未確認のemailを弾くかサインインボタンを押したときから弾いて未確認emailでアカウント動作させないようにする
 
   return (
     <>
