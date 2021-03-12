@@ -4,17 +4,19 @@ import {
   CardActions,
   CardContent,
   Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   LinearProgress,
   makeStyles,
   Modal,
-  Typography,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Paper,
+  Typography,
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import ReactTagInput from '@pathofdev/react-tag-input';
+import '@pathofdev/react-tag-input/build/index.css';
 import {
   convertFromRaw,
   Editor,
@@ -24,11 +26,9 @@ import {
 import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { setTimeout } from 'timers';
-import ReactTagInput from '@pathofdev/react-tag-input';
-import '@pathofdev/react-tag-input/build/index.css';
 
 const useMemoCardStyle = makeStyles((theme) => ({
   card: {
@@ -459,7 +459,7 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
               />
             </div>
             <StyledEditCardContent>
-              <Editor
+              <ContentEditor
                 editorState={editCardContentEditorState}
                 onChange={onContentChanged}
                 placeholder="本文なし"
@@ -471,3 +471,24 @@ export default function MemoCard(props: MemoCardProps): JSX.Element {
     </>
   );
 }
+
+const ContentEditor = (props: {
+  editorState: EditorState;
+  onChange: (e: EditorState) => Promise<void>;
+  placeholder: string;
+}): JSX.Element => {
+  const editorRef = useRef<Editor>(null);
+
+  useEffect(() => {
+    editorRef.current?.focus();
+  }, []);
+
+  return (
+    <Editor
+      editorState={props.editorState}
+      onChange={props.onChange}
+      placeholder={props.placeholder}
+      ref={editorRef}
+    />
+  );
+};

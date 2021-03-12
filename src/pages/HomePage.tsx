@@ -17,7 +17,7 @@ import 'draft-js/dist/Draft.css';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
@@ -96,6 +96,10 @@ function HomePage(): JSX.Element {
   const [contentEditorState, setContentEditorState] = useState(() =>
     EditorState.createEmpty()
   );
+
+  const handleContentOnChange = (e: EditorState) => {
+    setContentEditorState(e);
+  };
 
   const [titleEditorState, setTitleEditorState] = useState(() =>
     EditorState.createEmpty()
@@ -257,10 +261,10 @@ function HomePage(): JSX.Element {
                 />
               </div>
               <div className={classes.createCardContent}>
-                <Editor
+                <ContentEditor
                   placeholder="本文は自動で入力されません"
                   editorState={contentEditorState}
-                  onChange={setContentEditorState}
+                  onChange={handleContentOnChange}
                 />
               </div>
             </Card>
@@ -270,6 +274,27 @@ function HomePage(): JSX.Element {
     </>
   );
 }
+
+const ContentEditor = (props: {
+  editorState: EditorState;
+  onChange: (e: EditorState) => void;
+  placeholder: string;
+}): JSX.Element => {
+  const editorRef = useRef<Editor>(null);
+
+  useEffect(() => {
+    editorRef.current?.focus();
+  }, []);
+
+  return (
+    <Editor
+      editorState={props.editorState}
+      onChange={props.onChange}
+      placeholder={props.placeholder}
+      ref={editorRef}
+    />
+  );
+};
 
 const StyledErrorText = styled.div`
   color: red;
