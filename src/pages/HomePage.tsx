@@ -4,26 +4,28 @@ import {
   LinearProgress,
   makeStyles,
   Modal,
+  TextField,
   Typography,
 } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import {
+  ContentState,
   Editor,
   EditorState,
   getDefaultKeyBinding,
-  ContentState,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
-import { Redirect } from 'react-router-dom';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
-import ReactTagInput from '@pathofdev/react-tag-input';
 import styled from 'styled-components';
 import Header from '../components/Header';
-import MemoCard, { MemoCardProps } from '../components/MemoCard';
+import MemoCard, {
+  MemoCardProps,
+  StyledTagInputForm,
+} from '../components/MemoCard';
 import MemoCardSkeletons from '../components/MemoCardSkeletons';
 import '../index';
 
@@ -243,7 +245,7 @@ function HomePage(): JSX.Element {
               tabIndex={-1}
             >
               <div className={classes.editCardTagnames}>
-                <ReactTagInput
+                {/* <ReactTagInput
                   tags={createTags}
                   onChange={(e) => setCreateTags(e)}
                   placeholder="input & enter"
@@ -252,6 +254,17 @@ function HomePage(): JSX.Element {
                   validator={(value) =>
                     !createTags.includes(value) && value.trim() !== ''
                   }
+                /> */}
+                <StyledTagInputForm
+                  freeSolo
+                  multiple
+                  size="small"
+                  renderInput={(params) => {
+                    return <TextField {...params} variant="outlined" />;
+                  }}
+                  value={createTags}
+                  onChange={(_, value) => setCreateTags(value as string[])}
+                  options={[]}
                 />
               </div>
               <div className={classes.createCardTitle}>

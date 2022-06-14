@@ -165,38 +165,50 @@ export default function SignUpPage(props: {
             <StyledPartitionText>or</StyledPartitionText>
           </StyledPrtition>
 
-          <form>
+          <form noValidate autoComplete="on">
             <StyledTextField
-              variant="outlined"
-              label="email"
-              type="email"
-              required
-              value={emailStr}
-              onChange={(e) => setEmailStr(e.target.value)}
-              error={emailFormError}
+              id="SignUpEmail"
+              name="Email"
               autoComplete="username"
+              autoCapitalize="none"
+              spellCheck="false"
+              type="email"
+              value={emailStr}
+              error={emailFormError}
+              onChange={(e) => setEmailStr(e.target.value)}
+              label="email"
+              variant="outlined"
+              required
             />
 
             <StyledTextField
-              variant="outlined"
-              label="Password"
+              id="SignUpPassWd"
+              name="Passwd"
+              autoComplete="new-password"
+              autoCapitalize="none"
+              spellCheck="false"
               type="password"
-              placeholder="最低8文字必要です"
-              required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
               error={passwordFormError}
-              autoComplete="new-password"
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="最低8文字必要です"
+              label="Password"
+              variant="outlined"
+              required
             />
 
             <StyledTextField
-              variant="outlined"
-              label="Password 確認"
+              id="ConfimPasswd"
+              name="ConfimPasswd"
               type="password"
-              required
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              error={confirmFormError}
               autoComplete="new-password"
+              autoCapitalize="none"
+              value={confirmPassword}
+              error={confirmFormError}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              label="Password 確認"
+              variant="outlined"
+              required
             />
           </form>
 

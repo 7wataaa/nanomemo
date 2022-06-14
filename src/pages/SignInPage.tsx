@@ -133,27 +133,35 @@ export default function SignInPage(props: {
           <StyledPartitionText>or</StyledPartitionText>
         </StyledPrtition>
 
-        <form>
+        <form noValidate autoComplete="on">
           <StyledTextField
-            variant="outlined"
-            label="email"
-            type="email"
-            required
+            id="SignInEmail"
+            name="Email"
             autoComplete="username"
+            autoCapitalize="none"
+            spellCheck="false"
+            type="email"
             value={emailStr}
             error={emailFormError}
             onChange={(e) => setEmailStr(e.target.value)}
+            label="email"
+            variant="outlined"
+            required
           />
 
           <StyledTextField
-            variant="outlined"
-            label="Password"
-            type="password"
-            required
+            id="SignInPassWd"
+            name="PassWd"
             autoComplete="current-password"
+            autoCapitalize="none"
+            spellCheck="false"
+            type="password"
             value={password}
             error={passwordFormError}
             onChange={(e) => setPassword(e.target.value)}
+            label="Password"
+            variant="outlined"
+            required
           />
         </form>
 

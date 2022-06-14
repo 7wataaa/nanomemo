@@ -146,7 +146,7 @@ const StyledEditCardContent = styled.div`
   overflow: hidden;
 `;
 
-const StyledTagInputForm = styled(Autocomplete)`
+export const StyledTagInputForm = styled(Autocomplete)`
   margin-bottom: 0px;
 `;
 
